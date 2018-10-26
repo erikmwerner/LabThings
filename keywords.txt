@@ -1,0 +1,129 @@
+#######################################
+# keywords.txt
+# Provides LabThings Syntax highlighting
+# for Arduino IDE
+#
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+#######################################
+
+#######################################
+# Syntax for messengers
+#######################################
+
+Message_Handler	KEYWORD1
+attachFunction	KEYWORD2
+handleMessage	KEYWORD2
+
+ASCII_Serial	KEYWORD1
+
+Binary_Serial	KEYWORD1
+setMessageReceivedCallback	KEYWORD2
+setMessageSentCallback	KEYWORD2
+
+#######################################
+# Syntax for devices
+#######################################
+
+Device_Manager	KEYWORD1
+registerDevice	KEYWORD2
+attachDevice	KEYWORD2
+deviceCount	KEYWORD2
+device	KEYWORD2
+
+LT_Device	KEYWORD1
+UDID	KEYWORD2
+
+LT_AnalogOutput	KEYWORD1
+
+LT_AnalogSensor	KEYWORD1
+getSample	KEYWORD2
+
+LT_DebouncedButton	KEYWORD1
+setButtonReleasedCallback	KEYWORD2
+setButtonPressedCallback	KEYWORD2
+isPressed	KEYWORD2
+
+LT_DigitalOutput	KEYWORD1
+setValue	KEYWORD2
+getValue	KEYWORD2
+
+LT_DigitalSensor	KEYWORD1
+setPolling	KEYWORD2
+setPollingIntervalUs	KEYWORD2
+setNewSampleCallback	KEYWORD2
+getSample	KEYWORD2
+
+LT_Stepper	KEYWORD1
+
+LT_Encoder	KEYWORD1
+resetPosition	KEYWORD2
+position	KEYWORD2
+setValueChangedCallback	KEYWORD2
+setDebounceIntervalUs	KEYWORD2
+
+LT_StateSaver	KEYWORD1
+
+#######################################
+# Syntax for Ui
+#######################################
+
+Ui	KEYWORD1
+
+UiContext	KEYWORD1
+
+MainMenu	KEYWORD1
+setCurrentScreen	KEYWORD2
+setSleepTimeout	KEYWORD2
+setHomeTimeout	KEYWORD2
+currentScreen	KEYWORD2
+setHomeScreen	KEYWORD2
+increment	KEYWORD2
+decrement	KEYWORD2
+enter	KEYWORD2
+
+MenuScreen	KEYWORD1
+addMenu	KEYWORD2
+
+GraphicsItem	KEYWORD1
+addItem	KEYWORD2
+removeItem	KEYWORD2
+setPos	KEYWORD2
+
+MenuBar	KEYWORD1
+
+NumberItem	KEYWORD1
+
+TextItem	KEYWORD1
+
+GraphItem	KEYWORD1
+
+#######################################
+# Syntax for utilities
+#######################################
+
+LT_Timer	KEYWORD1
+
+start	KEYWORD2
+stop	KEYWORD2
+setSingleShot	KEYWORD2
+setTimeout	KEYWORD2
+
+LT_current_time_us	LITERAL1
+LT_VERSION	LITERAL1
+Callback	LITERAL1
+
+#######################################
+# Syntax for Streaming
+#######################################
+
+Streaming	KEYWORD1
+
+_HEX	KEYWORD2
+_DEC	KEYWORD2
+_OCT	KEYWORD2
+_BIN	KEYWORD2
+_BYTE	KEYWORD2
+
+endl	LITERAL1

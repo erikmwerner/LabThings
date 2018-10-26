@@ -1,0 +1,16 @@
+{
+  "name": "LabThings",
+  "keywords": "IoT, oled, screen, encoder, pushbutton, debounce, stepper, motor, sensor, serial",
+  "description": "Arduino library for creating lab tools and IoT devices",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/erikmwerner/labthings.git"
+  },
+  "frameworks": "arduino",
+  "platforms":
+  [
+    "atmelavr",
+    "teensy"
+  ]
+}
