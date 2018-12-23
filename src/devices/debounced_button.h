@@ -11,21 +11,18 @@ class LT_DebouncedButton : public LT_Device {
     volatile uint8_t _button_state;
     volatile uint8_t _last_button_state;
     volatile uint32_t _t_last_state_change_us;
+    volatile bool _button_went_low, _button_went_high;
     uint32_t _debounce_interval_us = 50000;//50ms
     voidCallback _callback_released = NULL;
     voidCallback _callback_pressed = NULL;
-
-    void buttonStateChanged() {
+    
+    inline void onButtonStateChanged() {
       if (_button_state == HIGH) {
-        if (_callback_released != NULL) {
-          (*_callback_released)();
-        }
+        _button_went_high = true;
       }
       else {
-        if (_callback_pressed != NULL) {
-           (*_callback_pressed)();
-         }
-       }
+        _button_went_low = true;
+      }
     }
 
   public:
@@ -57,27 +54,44 @@ class LT_DebouncedButton : public LT_Device {
         }
       _last_button_state = _button_state = digitalRead(_pin);
       _t_last_state_change_us = LT_current_time_us;
+      _button_went_low = _button_went_high = false;
     }
     
     // ISR routine is same as an event loop
     void handleInterrupt() {
-      loop();
+      LT_current_time_us = micros();
+      debounceLockout();
     }
     
     void loop() {
       debounceLockout();
+      if (_button_went_high) {
+        if (_callback_released != NULL) {
+          (*_callback_released)();
+        }
+        _button_went_high = false;
+      }
+      else if (_button_went_low) {
+        if (_callback_pressed != NULL) {
+           (*_callback_pressed)();
+         }
+         _button_went_low = false;
+       }
     }
     
     // Method 1: Lockout mode
     // only report position changes if t > debounce has elapsed
     // this method responds to changes instantly
-    void debounceLockout() {
+    // the current button reading is stored in _button_state
+    inline void debounceLockout() {
       uint8_t reading = digitalRead(_pin);
-      if ((LT_current_time_us - _t_last_state_change_us) >= _debounce_interval_us ) {
-        if (reading != _button_state) {
+
+      // if the debounce interval has elapsed, save the button state
+      if ( ( LT_current_time_us - _t_last_state_change_us ) >= _debounce_interval_us ) {
+        if ( reading != _button_state ) {
           _button_state = reading;
-          buttonStateChanged();
-          _last_button_state = reading;
+          onButtonStateChanged();
+          //_last_button_state = reading;
           _t_last_state_change_us = LT_current_time_us;
         }
       }
@@ -87,7 +101,7 @@ class LT_DebouncedButton : public LT_Device {
     // store the first change and wait until things stop changing to report
     // only report if it it's been stable for t > debounce
     // this method waits until debounce has elapsed to respond
-    void debounceSteady() {
+    inline void debounceSteady() {
       uint8_t reading = digitalRead(_pin);
 
       // if the state has changed, note the time
@@ -98,8 +112,9 @@ class LT_DebouncedButton : public LT_Device {
       if (reading != _button_state) {
         // and enough time has passed
         if ((LT_current_time_us - _t_last_state_change_us) >= _debounce_interval_us ) {
+          // save the button state
           _button_state = reading;
-          buttonStateChanged();
+          onButtonStateChanged();
         }
       }
       _last_button_state = reading;

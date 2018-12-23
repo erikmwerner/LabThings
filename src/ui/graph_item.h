@@ -22,7 +22,8 @@ struct DataPoint {
     DataPoint(T key = 0, T value = 0) : x(key), y(value){}
 };
 
-template <uint8_t POINTS, typename T>
+//template <uint8_t POINTS, typename T>
+template <int POINTS, typename T, class TS = typename SelectInteger<POINTS>::type>
 class DataSet : public RingBuffer<POINTS, DataPoint<T> > {
     T _y_min = 1;
     T _y_max = 1;
@@ -38,7 +39,7 @@ class DataSet : public RingBuffer<POINTS, DataPoint<T> > {
       _x_max = p.x;
       _y_min = p.y;
       _y_max = p.y;
-      uint8_t i = RingBuffer<POINTS, DataPoint<T> >::count();
+      TS i = RingBuffer<POINTS, DataPoint<T> >::count();
       do {
         RingBuffer<POINTS,DataPoint<T> >::get( i - 1, &p );
         if(p.x < _x_min) {
@@ -69,7 +70,8 @@ class DataSet : public RingBuffer<POINTS, DataPoint<T> > {
     
 };
 
-template <typename T, uint8_t POINTS>
+//template <typename T, uint8_t POINTS>
+template <typename T, int POINTS, class TS = typename SelectInteger<POINTS>::type>
 class GraphItem : public GraphicsItem {
     const char* _title = NULL;
     const char* _x_label = NULL;
@@ -110,7 +112,7 @@ class GraphItem : public GraphicsItem {
     }*/
     
     void drawScatter(UiContext* context) {
-      uint8_t i = dataSet.count();
+      TS i = dataSet.count();
       uint8_t my, mx;
       DataPoint<T> p;
       do {
@@ -121,9 +123,9 @@ class GraphItem : public GraphicsItem {
       } while( --i );
     }
     void drawLines(UiContext* context) {
-      DataPoint<T> p1, p2;
+      TS i = dataSet.count();
       uint8_t mx1, my1, mx2, my2;
-      uint8_t i = dataSet.count();
+      DataPoint<T> p1, p2;
       do {
         if( i > 1) {
           dataSet.get(i-2,&p1);
@@ -137,7 +139,7 @@ class GraphItem : public GraphicsItem {
       } while( --i );
     }
     void drawBars(UiContext* context) {
-      uint8_t i = dataSet.count();
+      TS i = dataSet.count();
       uint8_t my, mx;
       DataPoint<T> p;
       do {

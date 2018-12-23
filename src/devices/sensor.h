@@ -39,7 +39,7 @@ class LT_Sensor : public LT_Device {
     
     virtual uint8_t readSensor() = 0;
 
-    void loop() {
+    virtual void loop() {
       if(_polling) {
         if( (LT_current_time_us - _t_last_sample_us) >= _polling_interval_us ) {
           if( readSensor() == 0) {

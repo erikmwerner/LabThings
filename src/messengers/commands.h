@@ -9,6 +9,7 @@ enum : uint8_t {
   Fn_Get_Controller_Name      = 1, // Get Controller Name
   Fn_Get_Controller_FW        = 2, // Get Controller Firmware Version
   Fn_Get_Device_Count         = 3, // Get Attached Device Count
+  //Fn_Get_Device_Type          = 4, // Get Device Type TK add type support
   Fn_Set_Device_Name          = 4, // Set Device Name
   Fn_Get_Device_Name          = 5, // Get Device Name
   Fn_Get_System_Status        = 6, // Get System Status

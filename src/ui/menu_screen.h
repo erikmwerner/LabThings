@@ -28,6 +28,7 @@ class MenuScreen : public GraphicsItem{
     MenuScreen* _parent = NULL;
     const char* _title = NULL;
     const __FlashStringHelper* _flash_title = NULL;
+    Callback _screen_entered_callback = NULL;
     
   public:
     MenuScreen(MenuScreen* parent, UiContext* context, const char* title)
@@ -53,10 +54,19 @@ class MenuScreen : public GraphicsItem{
     virtual void setDirty(bool dirty) {
       GraphicsItem::setDirty(dirty);
     }
+
+    void setScreenEnteredCallback(Callback c) {
+      _screen_entered_callback = c;
+    }
+    
     virtual MenuScreen* enter() { 
       //if( _parent != NULL) {
       //  _parent->setDirty(true);
      // }
+
+      if(_screen_entered_callback != NULL) {
+        (*_screen_entered_callback)();
+      }
       return _parent; 
     }
     
