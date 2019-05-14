@@ -110,6 +110,14 @@ class GraphItem : public GraphicsItem {
       context->display->drawStr(GRAPH_X+GRAPH_W, GRAPH_Y, "TR");
       context->display->drawStr(GRAPH_X+GRAPH_W, GRAPH_Y+GRAPH_H, "BR");
     }*/
+
+    // if x oveflows:
+    // 245, 250, 255, 0, 5, 10 ....
+    // take the difference between the first and last items in the RingBuffer
+    // first (newest) = 10, last (oldest) = 245. Then x-position = 255 + (new-old)
+    // oldest (245) - newest (10)
+    // 245 - 10, 250 - 10,  255 - 10, 0 - 10  5 - 10  10 - 10
+    // 235,      240,       245,      246,    251,      0
     
     void drawScatter(UiContext* context) {
       TS i = dataSet.count();

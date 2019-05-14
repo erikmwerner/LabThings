@@ -26,13 +26,14 @@ class LT_Device {
     
   public:
     LT_Device(const int id) : _udid(id) {}
-    virtual LT::DeviceType type() {return LT::NoType;}
+    virtual LT::DeviceType type() const {return LT::NoType;}
     const int8_t UDID(){return _udid;}
-    virtual void loop() {}
+    virtual void update() {}
     virtual void begin() {}
     virtual void* instance() {return NULL;}
 };
 
+// bring in a global external variable to keep track of time
 extern uint32_t LT_current_time_us;
 
 #endif //End __DEVICE__H__ include guard

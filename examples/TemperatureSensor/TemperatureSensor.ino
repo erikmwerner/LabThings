@@ -1,13 +1,13 @@
 // Include the objects we need to use
 #include <LabThings.h>
-ASCII_Serial messenger = ASCII_Serial(Serial, '<', ',', '>');
+ASCIISerial messenger = ASCII_Serial(Serial, '<', ',', '>');
 
-Message_Handler handler;
+MessageHandler handler;
 
-Device_Manager device_manager;
+DeviceManager device_manager;
 
 // Our MCU is connected to and LED on pin 13
-LT_Digital_Out led(device_manager.registerDevice(), 13);
+LT_DigitalOutput led(device_manager.registerDevice(), 13);
 
 
 void setup() {

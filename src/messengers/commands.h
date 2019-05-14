@@ -1,7 +1,7 @@
 #ifndef __COMMANDS_H__
 #define __COMMANDS_H__
 
-#define MAX_FUNCTIONS 64
+#define MAX_FUNCTIONS 64 // TK why?
 // Function enumeration
 enum : uint8_t {
   // System functions for reading and writing controller and device information

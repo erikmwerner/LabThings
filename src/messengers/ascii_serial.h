@@ -11,11 +11,10 @@
 // If a start character is not the first character in the message, all message data is discarded
 
 // The default message delimiters are listed below, but can be changed in the constructor
-//									Decimal	Hex		ASCII
+//						Decimal		Hex		ASCII
 // start of transmission 			60		3C		<
+// field separator				44		2C		,
 // end of transmission				62		3E		>
-// information separator			44		2C		,
-
 
 // Example message from the master to the slave:
 // < Message ID, Value , ... , Value >
@@ -30,14 +29,14 @@
 typedef void(*intCallback) (int);
 //};
 
-class ASCII_Serial {
-    char _delimiters[4] = {'<', ',', '>',0};
+class ASCIISerial {
+    Stream* _com = NULL;
+    const char _delimiters[4]; // default is {'<', ',', '>',0};
     char _message[MAX_MESSAGE_LENGTH];
     volatile uint8_t _msg_idx = 0;
     volatile bool _pending_msg = false;
     intCallback _rx_callback = NULL;
     intCallback _tx_callback = NULL;
-    Stream* _com = NULL;
 
     void handleByte(char data) {
       if ( (char)data == _delimiters[0] ) {
@@ -73,13 +72,8 @@ class ASCII_Serial {
     }
 
   public:
-    ASCII_Serial(Stream &s, const char som = '<', const char sep = ',', const char eom = '>')
-    {
-      _delimiters[0] = som;
-      _delimiters[1] = sep;
-      _delimiters[2] = eom;
-      _com = &s;
-    }
+    ASCIISerial(Stream &s, const char som = '<', const char sep = ',', const char eom = '>')
+    :_com(&s), _delimiters( {som, sep, eom, 0} ) {}
 
     void setMessageReceivedCallback(intCallback c) {
       _rx_callback = c;
@@ -88,7 +82,7 @@ class ASCII_Serial {
       _tx_callback = c;
     }
     
-    void loop() {
+    void update() {
       // check for new data
       while (_com->available()) {
         handleByte(_com->read());

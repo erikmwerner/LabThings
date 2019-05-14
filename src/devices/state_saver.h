@@ -13,14 +13,14 @@
 
 typedef void(*voidCallback) ();
 
-class LT_State_Saver : public LT_Device {
+class LT_StateSaver : public LT_Device {
     voidCallback _callback = NULL;
     bool _dirty = false;
     uint32_t _last_eeprom_write_us;
     uint32_t _delayed_write_interval_us = 10000000; //10 s
 
   public:
-    LT_State_Saver(const uint8_t id) : LT_Device(id) {}
+    (const uint8_t id) : LT_Device(id) {}
     
     void setTimeoutCallback(voidCallback c) {
       _callback = c;
@@ -38,7 +38,7 @@ class LT_State_Saver : public LT_Device {
       _dirty = isDirty;
     }
 
-    void loop() {
+    void update() {
       if ( (LT_current_time_us - _last_eeprom_write_us) >= _delayed_write_interval_us ) {
         if (_dirty) {
           if (_callback != NULL) {

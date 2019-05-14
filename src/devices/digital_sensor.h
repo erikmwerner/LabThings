@@ -3,7 +3,11 @@
 
 #include "device.h"
 
-
+/**************************************************************************/
+/*! 
+    @brief  Base Class for digital sensor devices.
+*/
+/**************************************************************************/
 class LT_DigitalSensor : public LT_Sensor {
     uint8_t _value;
     const uint8_t _pin;
@@ -13,7 +17,7 @@ class LT_DigitalSensor : public LT_Sensor {
     LT_DigitalSensor(const uint8_t id, const uint8_t pin) 
     : LT_Sensor(id), _pin(pin) {}
     
-    LT::DeviceType type() { return LT::DigitalSensor; }
+    LT::DeviceType type() const { return LT::DigitalSensor; }
     
     void begin() {
       pinMode(_pin, INPUT);

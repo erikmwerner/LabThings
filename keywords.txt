@@ -12,33 +12,85 @@
 # Syntax for messengers
 #######################################
 
-Message_Handler	KEYWORD1
+MessageHandler	KEYWORD1
 attachFunction	KEYWORD2
+attachDefaultFunction	KEYWORD2
+getAttachedFunctionCount	KEYWORD2
+getAttachedFunctions	KEYWORD2
 handleMessage	KEYWORD2
 
-ASCII_Serial	KEYWORD1
-
-Binary_Serial	KEYWORD1
+ASCIISerial	KEYWORD1
 setMessageReceivedCallback	KEYWORD2
 setMessageSentCallback	KEYWORD2
+hasPendingMessagem	KEYWORD2
+getNextArgInt	KEYWORD2
+getNextArgLong	KEYWORD2
+getNextArgULong	KEYWORD2
+getNextArgDouble	KEYWORD2
+getNextArgChar	KEYWORD2
+
+BinarySerial	KEYWORD1
+setMessageReceivedCallback	KEYWORD2
+setMessageSentCallback	KEYWORD2
+
+Fn_Read_ID	LITERAL1
+Fn_Write_Name	LITERAL1
+Fn_Read_Name	LITERAL1
+Fn_Read_Version	LITERAL1
+Fn_Read_Device_Count	LITERAL1
+Fn_Read_Device_Type	LITERAL1
+Fn_Read_System_Status	LITERAL1
+Fn_Write_Digital_Output	LITERAL1
+Fn_Read_Digital_Output	LITERAL1
+Fn_Read_Digital_Input	LITERAL1
+Fn_Write_PWM	LITERAL1
+Fn_Read_PWM	LITERAL1
+Fn_Read_ADC	LITERAL1
+Fn_Write_Sensor_Setting	LITERAL1
+Fn_Read_Sensor_Setting	LITERAL1
+Fn_Read_Sensor_Value	LITERAL1
+Fn_Write_Speed	LITERAL1
+Fn_Read_Speed	LITERAL1
+Fn_Write_Position	LITERAL1
+Fn_Read_Position	LITERAL1
+Fn_Write_Setting	LITERAL1
+Fn_Read_Setting	LITERAL1
+Fn_Enqueue	LITERAL1
+Fn_Read_From_Queue	LITERAL1
+Fn_Dequeue	LITERAL1
+Fn_Queue_Available	LITERAL1
+Fn_Queue_Capacity	LITERAL1
+Fn_Start_Protocol	LITERAL1
+Fn_Stop_Protocol	LITERAL1
+Fn_Reset_Protocol	LITERAL1
+Fn_User_Function	LITERAL1
 
 #######################################
 # Syntax for devices
 #######################################
 
-Device_Manager	KEYWORD1
+DeviceManager	KEYWORD1
 registerDevice	KEYWORD2
 attachDevice	KEYWORD2
 deviceCount	KEYWORD2
 device	KEYWORD2
+update	KEYWORD2
 
 LT_Device	KEYWORD1
 UDID	KEYWORD2
+type KEYWORD2
+instance KEYWORD2
 
 LT_AnalogOutput	KEYWORD1
+setValue	KEYWORD2
 
 LT_AnalogSensor	KEYWORD1
-getSample	KEYWORD2
+readSensor	KEYWORD2
+setPolling	KEYWORD2
+setPollingInterval	KEYWORD2
+getPollingInterval	KEYWORD2
+setNewDataCallback	KEYWORD2
+lastSampleTime	KEYWORD2
 
 LT_DebouncedButton	KEYWORD1
 setButtonReleasedCallback	KEYWORD2
@@ -56,6 +108,15 @@ setNewSampleCallback	KEYWORD2
 getSample	KEYWORD2
 
 LT_Stepper	KEYWORD1
+setResolution	KEYWORD2
+setSpeed	KEYWORD2
+getSpeed	KEYWORD2
+getInterval	KEYWORD2
+getResolution	KEYWORD2
+setPosition	KEYWORD2
+rotate	KEYWORD2
+distanceToGo	KEYWORD2
+getPosition	KEYWORD2
 
 LT_Encoder	KEYWORD1
 resetPosition	KEYWORD2

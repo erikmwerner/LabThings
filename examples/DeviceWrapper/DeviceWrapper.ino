@@ -39,33 +39,35 @@
 #include <HoneywellTruStabilitySPI.h>
 #include <LabThings.h>
 
-Device_Manager<1> device_manager;
+DeviceManager<1> device_manager;
 
 /**************** Wrapper Class ****************/
-/* Define a class that inherits from the library and from LT_Device */
-class LT_SPI_Sensor : public TruStability_PressureSensor, public LT_Device {
+/* Define a class that inherits from the sensor's library and from LT_Device */
+class LT_SPISensor : public TruStabilityPressureSensor, public LT_Device {
 
   public:
-    LT_SPI_Sensor(const int id, uint8_t ss_pin, float p_min, float p_max)  :
-    TruStability_PressureSensor(ss_pin, p_min, p_max), LT_Device(id) {}
+    // the constructor
+    LT_SPISensor(const int id, uint8_t ss_pin, float p_min, float p_max)  :
+    TruStabilityPressureSensor(ss_pin, p_min, p_max), LT_Device(id) {}
 
     // subclasses of LT_Device must implement type()
-    LT::DeviceType type() { return (LT::DeviceType)(LT::UserType + 1); }
+    LT::DeviceType type() const { return (LT::DeviceType)(LT::UserType + 1); }
 
-    // it is not required to implement instance(), but messenger applications may need it
-    virtual void* instance() {return this;}
+    // it is not required to implement instance(), but programs using messengers may need it
+    virtual void* instance() { return this; }
 
-    // implement library-specific functions in begin, loop, or other necessary functions
+    // implement library-specific functions in begin, update, or other added functions
     void begin() {
-      TruStability_PressureSensor::begin();
+      TruStabilityPressureSensor::begin();
     }
 
-    void loop() {
-      if( TruStability_PressureSensor::readSensor() == 0 ) {
+    void update() {
+      // TruStabilityPressureSensor::readSensor() returns 0 when new data is available
+      if( TruStabilityPressureSensor::readSensor() == 0 ) {
         Serial.print("temp: ");
-        Serial.print(TruStability_PressureSensor::temperature());
+        Serial.print(TruStabilityPressureSensor::temperature());
         Serial.print(" pressure: ");
-        Serial.println(TruStability_PressureSensor::pressure());
+        Serial.println(TruStabilityPressureSensor::pressure());
       }
     }
     
@@ -73,7 +75,7 @@ class LT_SPI_Sensor : public TruStability_PressureSensor, public LT_Device {
 /**************** /Wrapper Class ****************/
 
 // Once the pressure sensor logic has been defined, the remaining code is short
-LT_SPI_Sensor pressure_sensor(device_manager.registerDevice(), SS, -15.0, 15.0);
+LT_SPISensor pressure_sensor(device_manager.registerDevice(), SS, -15.0, 15.0);
 
 void setup() {
   Serial.begin(115200);
@@ -81,5 +83,5 @@ void setup() {
 }
 
 void loop() {
-  device_manager.loop();
+  device_manager.update();
 }

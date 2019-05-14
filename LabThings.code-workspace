@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "/Users/erik/Documents/Arduino/libraries/HoneywellTruStabilitySPI"
+		},
+		{
+			"path": "/Users/erik/Documents/Arduino/libraries/HoneywellZephyrI2C"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"__config": "cpp",
+			"__nullptr": "cpp",
+			"exception": "cpp",
+			"initializer_list": "cpp",
+			"new": "cpp",
+			"stdexcept": "cpp",
+			"typeinfo": "cpp"
+		}
+	}
+}

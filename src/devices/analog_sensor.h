@@ -4,6 +4,11 @@
 #include "digital_sensor.h"
 
 
+/**************************************************************************/
+/*! 
+    @brief  Base Class for analog sensor devices.
+*/
+/**************************************************************************/
 class LT_AnalogSensor : public LT_Sensor {
   int _value;
   const uint8_t _pin;
@@ -12,20 +17,32 @@ class LT_AnalogSensor : public LT_Sensor {
     LT_AnalogSensor(const uint8_t id, const uint8_t pin) 
     : LT_Sensor(id), _pin(pin) {}
     
-    LT::DeviceType type() { return LT::AnalogSensor; }
+    LT::DeviceType type() const { return LT::AnalogSensor; }
     
     void begin() {
       pinMode(_pin, INPUT);
     }
-    
-    // readSensor always returns 0 to indicate there
-    // is a fresh sample
+
+
+    /**************************************************************************/
+    /*!
+    @brief  request the sensor to update it's internal data with the most recent 
+            value available. Data should be retrieved using a seperate function.
+            Subclasses should return 0 to indicate there is fresh data.
+    @return  always returns 0 to indicate there is a fresh sample
+    */
+    /**************************************************************************/
     uint8_t readSensor() {
       _value = analogRead(_pin);
       return 0;
     }
     
-    // return the most recent sample
+    /**************************************************************************/
+    /*!
+    @brief  
+    @return  the most recent sample
+    */
+    /**************************************************************************/
     int value() {
       return _value;
     }

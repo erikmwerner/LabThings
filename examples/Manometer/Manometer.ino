@@ -1,24 +1,24 @@
 #include <LabThings.h>
 
 #define N_DEVICES 5
-Device_Manager<N_DEVICES> device_manager;
+DeviceManager<N_DEVICES> device_manager;
 
 LT_Encoder encoder(device_manager.registerDevice(), 2, 3, true);
-LT_Debounced_Button button(device_manager.registerDevice(), 4, true);
-LT_Analog_Sensor sensor1(device_manager.registerDevice(), 14);
-LT_Analog_Sensor sensor2(device_manager.registerDevice(), 15);
+LT_DebouncedButton button(device_manager.registerDevice(), 4, true);
+LT_AnalogSensor sensor1(device_manager.registerDevice(), 14);
+LT_AnalogSensor sensor2(device_manager.registerDevice(), 15);
 
 U8G2_SSD1306_128X64_NONAME_2_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
-Menu menu(device_manager.registerDevice(), &u8g2);
+UiContext context(&u8g2);
+Ui menu(device_manager.registerDevice(), context);
 
-#define N_SCREENS
-ListScreen<N_SCREENS> screen_main(NULL, "Main Menu");
+MainMenu<3> screen_main(NULL, &context, "Menu");
 InputScreen<float> inputScreen1(&screen_main, "Sensor 1", -30.0, 30.0);
 InputScreen<float> inputScreen2(&screen_main, "Sensor 2", -30.0, 30.0);
 GraphScreen<int, 64> screen_graph(&screen_main, "Graph", "Time", "Pressure (psig)");
 
 void setup() {
-  // put your setup code here, to run once:
+  Serial.begin(115200);
   menu.setCurrentScreen(&screen_main);
   menu.setSleepTimeout(0); // prevent sleeping screen
 
@@ -40,13 +40,11 @@ void setup() {
 
   sensor1.setNewSampleCallback(onSensor1Data);
   sensor2.setNewSampleCallback(onSensor2Data);
-
-  Serial.begin(115200);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  device_manager.loop();
+  device_manager.update();
 }
 
 void onButtonReleased() {

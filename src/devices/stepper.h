@@ -3,19 +3,42 @@
 
 #include "device.h"
 
+/*!
+ * @file stepper.h
+ *
+ * @mainpage 
+ *
+ * @section intro_sec Introduction
+ *
+ *
+ * @section dependencies Dependencies
+ *
+ * @section author Author
+ *
+ * Written by Erik Werner
+ *
+ * @section license License
+ *
+ *
+ */
+
+
 typedef void(*intCallback) (int);
 
 class LT_Stepper : public LT_Device {
-    const uint8_t _step_pin, _dir_pin;
-    uint32_t _t_last_step;
-    uint32_t _interval;
-    uint32_t _pulse_width;
-    uint16_t _resolution;
-    int16_t _position;
-    int16_t _steps_remaining;
+    const uint8_t _step_pin; ///< digital input pin to control stepping
+    const uint8_t _dir_pin; ///< digital input pin to control direction
+    const int8_t _enable_pin; ///< digital input pin to control power to the motor
+    uint32_t _t_last_step; ///< the system time in microseconds that the last step was taken
+    uint32_t _interval; ///< the time in microseconds to wait until setting step high
+    uint32_t _pulse_width; ///< the minimum time in microseconds to hold a step pulse high
+    uint16_t _resolution; ///< the number of steps per revolution of the motor. Used in position measurements.
+    int16_t _position; ///< the current position of the motor from [0 resolution]
+    int16_t _steps_remaining; ///< the number of steps remaining until the motor has reached its target position
     bool _direction;
     bool _running;
     bool _stepping;
+    bool _enabled;
     //go ahead, take a step
     void step() {
         // finish a step
@@ -35,9 +58,10 @@ class LT_Stepper : public LT_Device {
             }
         }
     }
-    // called whenever a step is completed
-    // example: for a motor with 200 steps/rev, the position can be between 0 and 200
-    void updatePosition(int16_t position) {
+    // update the position variable
+    // this function is called whenever a step is completed
+    // example: for a motor with 200 steps/rev, the position can be [0, 199]
+    void updatePosition(const int16_t position) {
         _position = position;
         if( _position >= _resolution ){
             _position = 0;
@@ -63,10 +87,11 @@ class LT_Stepper : public LT_Device {
       }
     }
   public:
-    LT_Stepper(const uint8_t id, const uint8_t step_pin, const uint8_t dir_pin) 
-    : LT_Device(id), _step_pin(step_pin), _dir_pin(dir_pin) {}
+    LT_Stepper(const uint8_t id, const uint8_t step_pin, const uint8_t dir_pin,
+    const int8_t enable_pin = -1) : LT_Device(id), _step_pin(step_pin), 
+    _dir_pin(dir_pin), _enable_pin(enable_pin) {}
     
-    LT::DeviceType type() { return LT::Stepper; }
+    LT::DeviceType type() const { return LT::Stepper; }
     
     void begin() {
         _t_last_step = LT_current_time_us;
@@ -78,19 +103,35 @@ class LT_Stepper : public LT_Device {
         _direction = true;
         _running = false;
         _stepping = false;
+        _enabled = true;
         pinMode( _step_pin, OUTPUT );
         pinMode( _dir_pin, OUTPUT );
+        if(_enable_pin < 0) {
+          // an enable pin was not specified
+        }
+        else {
+          pinMode( _enable_pin, OUTPUT );
+          setEnabled(true);
+        }
         digitalWrite( _step_pin,LOW );
         digitalWrite( _dir_pin, _direction );
+
     }
-    void loop() {
+    void update() {
         if( _running || _stepping ) {
             step();
         }
     }
     LT_Stepper* instance() { return this; }
+
+    void setEnabled(const bool enabled) {
+      if(_enable_pin < 0) return;
+      // enable is active low
+      digitalWrite( _enable_pin, !enabled );
+      _enabled = enabled;
+    }
     
-    void setResolution(uint16_t resolution) {
+    void setResolution(const uint16_t resolution) {
       _resolution = resolution;
     }
     
@@ -112,23 +153,25 @@ class LT_Stepper : public LT_Device {
           _running = true;
         }
     }
+    
     double getSpeed() {
       double rpm = 60000000.0 / ( (double)(_resolution) * _interval);
       return rpm;
     }
     
     // read the motor speed and avoid float calculation
-    uint32_t getInterval() { return _interval; }
-    uint16_t getResolution() { return _resolution; }
+    uint32_t getInterval() const { return _interval; }
+    uint16_t getResolution() const { return _resolution; }
     
     // expects a position argument between 0 and _resolution
     // common _resolution values are 200, 400, 800, 1600
     // useful for setting index or zero position
-    void setPosition(uint16_t position) {
+    // use rotate() to move to a specific angle
+    void setPosition(const uint16_t position) {
       updatePosition(position);
     }
     
-    // take the specified number of steps. (-) is anti clockwise
+    // take the specified number of steps. use negative (-) for anti-clockwise rotation
     void rotate(int16_t steps, double rpm) {
       // save the starting point
       if(steps == 0 || rpm == 0) return;
@@ -141,12 +184,25 @@ class LT_Stepper : public LT_Device {
     }
     
     // return the number of steps between the current position and the target position
-    int16_t distanceToGo() {
+    int16_t distanceToGo() const {
       return _steps_remaining;
     }
     
-    // read the current postion. returns a value between 0 and _resolution
-    uint16_t getPosition() {return _position;}
+    /**************************************************************************/
+    /*!
+    @brief read the current postion of the motor
+    @return returns a value between 0 and _resolution
+    */
+    /**************************************************************************/
+    uint16_t getPosition() const {return _position;}
+    
+    /**************************************************************************/
+    /*!
+    @brief read if the motor driver is enabled
+    @return true if the driver is enabled
+    */
+    /**************************************************************************/
+    bool getEnabled() const {return _enabled;}
     
 };
 

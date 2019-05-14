@@ -5,6 +5,12 @@
 
 typedef void(*Callback) ();
 
+/**************************************************************************/
+/*! 
+    @brief  Base Class for all Lab Things sensor devices.
+    Subclasses must implement: type(), readSensor()
+*/
+/**************************************************************************/
 class LT_Sensor : public LT_Device {
     bool _polling;
     uint32_t _polling_interval_us = 50000;//50ms
@@ -17,7 +23,7 @@ class LT_Sensor : public LT_Device {
   public:
     LT_Sensor(const uint8_t id) : LT_Device(id) {}
     
-    virtual LT::DeviceType type() = 0;
+    virtual LT::DeviceType type() const = 0;
     
     void setPolling(bool isPolling) {
       _polling = isPolling;
@@ -39,7 +45,7 @@ class LT_Sensor : public LT_Device {
     
     virtual uint8_t readSensor() = 0;
 
-    virtual void loop() {
+    virtual void update() {
       if(_polling) {
         if( (LT_current_time_us - _t_last_sample_us) >= _polling_interval_us ) {
           if( readSensor() == 0) {
@@ -51,4 +57,4 @@ class LT_Sensor : public LT_Device {
     }
 };
 
-#endif // End __DIGITAL_SENSOR_H__ include guard
+#endif // End __SENSOR_H__ include guard

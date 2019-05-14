@@ -40,7 +40,7 @@
 // Include the objects we need to use
 // To manage inputs and outputs of 4 devices
 #include <LabThings.h>
-Device_Manager<4> device_manager;
+DeviceManager<4> device_manager;
 
 // Our MCU is connected to:
 // an encoder on pins 3 and 2 with pushbutton on pin 5
@@ -194,7 +194,7 @@ void setup() {
 void loop() {
   checkIR();
   // update all devices as often as possible
-  device_manager.loop();
+  device_manager.update();
 }
 
 void checkIR() {

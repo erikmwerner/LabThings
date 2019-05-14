@@ -1,7 +1,7 @@
 /*!
 * The Ui class manages one or more MenuScreens
 * Inherits from LT_Device UDID and type.
-* The Ui is updated in the DeviceManager loop.
+* The Ui is updated in the DeviceManager update function.
 * 
 */
 
@@ -54,7 +54,7 @@ class Ui : public LT_Device {
     Ui( const uint8_t id, UiContext context ) 
     : LT_Device(id), _context(context){}
 
-    LT::DeviceType type() {return LT::Ui; }
+    LT::DeviceType type() const {return LT::Ui; }
 
     void begin() {
       _context.begin();
@@ -64,7 +64,7 @@ class Ui : public LT_Device {
       //}
     }
 
-    void loop() {
+    void update() {
       // main drawing function
       if( _current_screen != NULL ) {
         // only redraw if the screen has changed

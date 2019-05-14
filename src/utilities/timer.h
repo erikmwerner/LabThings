@@ -15,7 +15,7 @@ class LT_Timer : public LT_Device {
   public:
     LT_Timer(const uint8_t id, uint32_t timeout) : LT_Device(id), _timeout(timeout) {}
     
-    LT::DeviceType type() {return LT::Timer;}
+    LT::DeviceType type() const {return LT::Timer;}
      void setCallback(voidCallback c) {
       _callback = c;
     }
@@ -39,7 +39,7 @@ class LT_Timer : public LT_Device {
       _isActive = false;
     }
     
-     void loop() {
+     void update() {
        if(_isActive) {
         if( (LT_current_time_us - _last_time) >= _timeout) {
             if (_callback != NULL) {

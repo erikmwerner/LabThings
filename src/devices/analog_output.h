@@ -4,10 +4,13 @@
 #include "digital_output.h"
 
 
-/*
-Untested: Use LEDC for PWM on ESP32
-*/
+/**************************************************************************/
+/*! 
+    @brief  Base Class for analog output devices
 
+    Untested: Use LEDC for PWM on ESP32
+*/
+/**************************************************************************/
 class LT_AnalogOutput : public LT_DigitalOutput {
   #if defined(ARDUINO_ARCH_ESP32)
     const uint8_t _channel;
@@ -21,7 +24,7 @@ class LT_AnalogOutput : public LT_DigitalOutput {
     LT_AnalogOutput(const uint8_t id, const uint8_t pin) 
     : LT_DigitalOutput(id, pin) {}
     #endif
-    LT::DeviceType type() { return LT::AnalogOutput; }
+    LT::DeviceType type() const { return LT::AnalogOutput; }
     
     #if defined(ARDUINO_ARCH_ESP32)
     void begin() {
@@ -30,7 +33,7 @@ class LT_AnalogOutput : public LT_DigitalOutput {
     }
     #endif
     
-    void setValue(int value) {
+    void setValue(const int value) {
       _value = value;
       #if defined(ARDUINO_ARCH_ESP32)
       ledcWrite(_channel, _value);

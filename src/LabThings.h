@@ -1,22 +1,23 @@
 
 /*!
-* Lab Things
+* Lab Things: an Arduino library for creating IoT instruments for the lab.
 */
 
 #ifndef __LABTHINGS__H__
 #define __LABTHINGS__H__
 
-// define fast digital to include (experimental) direct port writing
+// define fast digital i/o to include (experimental) direct port writing
 //#define FAST_DIGITAL
 #ifdef FAST_DIGITAL
 #include "utilities/fast_digital.h"
 #endif
 
+// define debug printing to print diagnostic information to the serial port
 //#define DEBUG_PRINT
 
 uint32_t LT_current_time_us;
-const static float LT_VERSION = 0.14;
-#define LT_VERSION_STRING "0.14"
+const static float LT_VERSION = 0.15;
+#define LT_VERSION_STRING "0.15"
 
 #include "devices/device.h"
 #include "devices/sensor.h"

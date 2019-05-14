@@ -59,8 +59,8 @@ void setup() {
 
 void loop() {
   // update the messenger and all devices as often as possible
-  messenger.loop();
-  device_manager.loop();
+  messenger.update();
+  device_manager.update();
 }
 
 // Define callback functions to use devices

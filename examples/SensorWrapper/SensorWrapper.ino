@@ -38,28 +38,35 @@
 #include <HoneywellTruStabilitySPI.h>
 #include <LabThings.h>
 
-Device_Manager<1> device_manager;
+DeviceManager<1> device_manager;
 
 /**************** Wrapper Class ****************/
-/* Define a class that inherits from the library and from LT_Sensor */
-class LT_SPI_Sensor : public TruStability_PressureSensor, public LT_Sensor {
+/* Define a class that inherits from the sensor's library and from LT_Sensor 
+ * Using LT_Sensor instead of LT_Device adds polling and data callback features 
+*/
+class LT_SPISensor : public TruStabilityPressureSensor, public LT_Sensor {
 
   public:
-    LT_SPI_Sensor(const int id, uint8_t ss_pin, float p_min, float p_max)  :
-    TruStability_PressureSensor(ss_pin, p_min, p_max), LT_Sensor(id) {}
+    // The constructor calls the sensor library constructor
+    LT_SPISensor(const int id, uint8_t ss_pin, float p_min, float p_max)  :
+    TruStabilityPressureSensor(ss_pin, p_min, p_max), LT_Sensor(id) {}
 
-    // subclasses of LT_Device must implement type()
-    LT::DeviceType type() { return (LT::DeviceType)(LT::UserType + 1); }
+    // Subclasses of LT_Device must implement type()
+    LT::DeviceType type() const { return (LT::DeviceType)(LT::UserType + 1); }
 
-    // it is not required to implement instance(), but messenger applications may need it
-    virtual void* instance() {return this;}
+    // It is not required to implement instance(), but programs using messengers may need it
+    virtual void* instance() { return this; }
 
-    // implement library-specific functions 
+    // begin() implements library-specific initialization 
     void begin() {
-      TruStability_PressureSensor::begin();
+      TruStabilityPressureSensor::begin();
     }
+
+    // override readSensor() to let the Lab Things device manager poll the sensor
     uint8_t readSensor() {
-      return TruStability_PressureSensor::readSensor();
+      // TruStabilityPressureSensor::readSensor() returns 0 when new data is available
+      // when readSensor() returns 0 to the base class, the new data callback is executed
+      return TruStabilityPressureSensor::readSensor();
     }
     
 };
@@ -67,7 +74,7 @@ class LT_SPI_Sensor : public TruStability_PressureSensor, public LT_Sensor {
 /**************** /Wrapper Class ****************/
 
 // Once the pressure sensor logic has been defined, the remaining code is short
-LT_SPI_Sensor pressure_sensor(device_manager.registerDevice(), SS, -15.0, 15.0);
+LT_SPISensor pressure_sensor(device_manager.registerDevice(), SS, -15.0, 15.0);
 
 void setup() {
   Serial.begin(115200);
@@ -82,7 +89,7 @@ void setup() {
 }
 
 void loop() {
-  device_manager.loop();
+  device_manager.update();
 }
 
 // callback function executes when new data is read

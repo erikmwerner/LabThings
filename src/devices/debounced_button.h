@@ -29,7 +29,7 @@ class LT_DebouncedButton : public LT_Device {
     LT_DebouncedButton(const uint8_t id, const uint8_t pin, const uint8_t pullup_enable = false)
     : LT_Device(id), _pin(pin), _pullup_enable(pullup_enable) {}
     
-    LT::DeviceType type() { return LT::DebouncedButton; }
+    LT::DeviceType type() const { return LT::DebouncedButton; }
     
     void setButtonReleasedCallback(voidCallback c) {
       _callback_released = c;
@@ -57,13 +57,24 @@ class LT_DebouncedButton : public LT_Device {
       _button_went_low = _button_went_high = false;
     }
     
-    // ISR routine is same as an event loop
+    /**************************************************************************/
+    /*!
+    @brief  ISR routine updates internal flags. Callback functions are executed in
+    the next event loop.
+    */
+    /**************************************************************************/
     void handleInterrupt() {
       LT_current_time_us = micros();
       debounceLockout();
     }
     
-    void loop() {
+    /**************************************************************************/
+    /*!
+    @brief  check the button state and update internal flags. If the state has
+    changed, execute the callback funtion.
+    */
+    /**************************************************************************/
+    void update() {
       debounceLockout();
       if (_button_went_high) {
         if (_callback_released != NULL) {
