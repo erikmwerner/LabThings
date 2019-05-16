@@ -18,8 +18,8 @@ enum TextAlign : uint8_t {
 //#define MAX_CHILDREN 8
 
 class GraphicsItem {
-GraphicsItem* _parent = NULL;
-GraphicsItem* _child = NULL;
+GraphicsItem* _parent = nullptr;
+GraphicsItem* _child = nullptr;
 // Graphics items default to dirty when constructed
 bool _isDirty = true; 
 uint8_t _x ,_y, _w, _h = 0;
@@ -57,7 +57,7 @@ void setSize(uint8_t w, uint8_t h) {
 GraphicsItem* parent() {return _parent;}
 
 void addChild(GraphicsItem* item) {
-  if(_child == NULL) {
+  if(_child == nullptr) {
     _child = item;
   }
   else {
@@ -77,15 +77,15 @@ GraphicsItem* removeChild(GraphicsItem* item) {
   if(item == _child) {
     // remove just this child
     GraphicsItem* temp = _child;
-    _child = NULL;
+    _child = nullptr;
     return temp; // returns the child that was removed
   }
-  if(_child != NULL) {
+  if(_child != nullptr) {
     // try to remove the child from another child
     return _child->removeChild(item);
   }
   else {
-    return NULL;
+    return nullptr;
   }
 /*
   if(_child->)
@@ -102,7 +102,7 @@ GraphicsItem* removeChild(GraphicsItem* item) {
 virtual void draw(UiContext* context) {
   //if( !_isVisible ) return; // uncomment for parent to hide children
 
-  if(_child != NULL) {
+  if(_child != nullptr) {
     _child->draw(context);
   }
   /*
@@ -138,7 +138,7 @@ uint8_t bottom() {
 uint8_t width() {return _w;}
 uint8_t height() {return _h;}
 
-GraphicsItem(GraphicsItem* parent = NULL, uint8_t x = 0, uint8_t y = 0, uint8_t w = 0, uint8_t h = 0) 
+GraphicsItem(GraphicsItem* parent = nullptr, uint8_t x = 0, uint8_t y = 0, uint8_t w = 0, uint8_t h = 0) 
 : _parent(parent), _x(x), _y(y), _w(w), _h(h) {}
 };
 
@@ -265,7 +265,7 @@ class NumberItem : public GraphicsItem {
   T _min_value;
   T _max_value;
   const uint8_t * _font;
-  Callback _value_changed_callback = NULL;
+  Callback _value_changed_callback = nullptr;
 
   // Delegate printing the value to specialized template functions
   template<typename TI>
@@ -301,7 +301,7 @@ class NumberItem : public GraphicsItem {
     if (_value < _min_value) {
       _value = _min_value;
     }
-    if (_value_changed_callback != NULL) {
+    if (_value_changed_callback != nullptr) {
       (*_value_changed_callback)();
     }
     //setSize(); // adjust width

@@ -11,10 +11,10 @@
 // If a start character is not the first character in the message, all message data is discarded
 
 // The default message delimiters are listed below, but can be changed in the constructor
-//						Decimal		Hex		ASCII
-// start of transmission 			60		3C		<
-// field separator				44		2C		,
-// end of transmission				62		3E		>
+//                                Decimal    Hex    ASCII
+// start of transmission          60        3C      <
+// field separator                44        2C      ,
+// end of transmission            62        3E      >
 
 // Example message from the master to the slave:
 // < Message ID, Value , ... , Value >
@@ -30,13 +30,13 @@ typedef void(*intCallback) (int);
 //};
 
 class ASCIISerial {
-    Stream* _com = NULL;
+    Stream* _com = nullptr;
     const char _delimiters[4]; // default is {'<', ',', '>',0};
     char _message[MAX_MESSAGE_LENGTH];
     volatile uint8_t _msg_idx = 0;
     volatile bool _pending_msg = false;
-    intCallback _rx_callback = NULL;
-    intCallback _tx_callback = NULL;
+    intCallback _rx_callback = nullptr;
+    intCallback _tx_callback = nullptr;
 
     void handleByte(char data) {
       if ( (char)data == _delimiters[0] ) {
@@ -46,7 +46,7 @@ class ASCIISerial {
       if ( (char)data == _delimiters[2] ) {
         // got a message?
         if ( _message[0] == _delimiters[0] ) {
-          if (_rx_callback != NULL) {
+          if (_rx_callback != nullptr) {
             //handle the message
             char* token = strtok(_message, _delimiters);
             if(token) {

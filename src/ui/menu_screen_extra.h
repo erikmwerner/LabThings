@@ -142,7 +142,7 @@ class AboutScreen : public TextScreen {
 typedef void (*IrCodeCallback) (const int arg1, const uint32_t arg2);
 class IrProgScreen : public TextScreen {
     int _ir_addr = 0;
-    IrCodeCallback _irCodeCallback = NULL;
+    IrCodeCallback _irCodeCallback = nullptr;
   public:
     IrProgScreen(MenuScreen* parent, UiContext* context, const char* title, const char* text, int ir_addr)
       : TextScreen(parent, context, title, text), _ir_addr(ir_addr) {
@@ -154,7 +154,7 @@ class IrProgScreen : public TextScreen {
       _irCodeCallback = c;
     }
     void setValue(uint32_t value) {
-      if (_irCodeCallback != NULL) {
+      if (_irCodeCallback != nullptr) {
         (*_irCodeCallback)(_ir_addr, value);
       }
       TextScreen::enter();

@@ -9,7 +9,7 @@
 #include <U8x8lib.h>
 
 struct UiContext {
-  U8G2* display = NULL;
+  U8G2* display = nullptr;
   const uint8_t _margin;
   const uint8_t* _font_large;
   const uint8_t* _font_medium;
@@ -41,16 +41,16 @@ struct UiContext {
     void setFont(const uint8_t* font) {
        display->setFont(font);
     }
-    const uint8_t* fontLarge() {
+    const uint8_t* fontLarge() const {
       return _font_large;
     }
-    const uint8_t* fontMedium() {
+    const uint8_t* fontMedium() const {
       return _font_medium;
     }
-    const uint8_t* fontSmall() {
+    const uint8_t* fontSmall() const {
       return _font_small;
     }
-    const uint8_t* fontSymbol() {
+    const uint8_t* fontSymbol() const {
       return _font_symbol;
     }
     

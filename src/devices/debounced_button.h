@@ -13,8 +13,8 @@ class LT_DebouncedButton : public LT_Device {
     volatile uint32_t _t_last_state_change_us;
     volatile bool _button_went_low, _button_went_high;
     uint32_t _debounce_interval_us = 50000;//50ms
-    voidCallback _callback_released = NULL;
-    voidCallback _callback_pressed = NULL;
+    voidCallback _callback_released = nullptr;
+    voidCallback _callback_pressed = nullptr;
     
     inline void onButtonStateChanged() {
       if (_button_state == HIGH) {
@@ -77,13 +77,13 @@ class LT_DebouncedButton : public LT_Device {
     void update() {
       debounceLockout();
       if (_button_went_high) {
-        if (_callback_released != NULL) {
+        if (_callback_released != nullptr) {
           (*_callback_released)();
         }
         _button_went_high = false;
       }
       else if (_button_went_low) {
-        if (_callback_pressed != NULL) {
+        if (_callback_pressed != nullptr) {
            (*_callback_pressed)();
          }
          _button_went_low = false;

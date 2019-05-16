@@ -15,7 +15,7 @@ class LT_Sensor : public LT_Device {
     bool _polling;
     uint32_t _polling_interval_us = 50000;//50ms
     
-    Callback _newDataCallback = NULL;
+    Callback _newDataCallback = nullptr;
     
     private:
     volatile uint32_t _t_last_sample_us = 0;

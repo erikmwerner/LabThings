@@ -6,7 +6,7 @@
 template < uint8_t MAX_DEVICES >
 class DeviceManager {
     int8_t n_devices = 0; ///< count of attached devices
-    LT_Device* _dev[MAX_DEVICES] = {NULL}; ///< pointers to all attached devices
+    LT_Device* _dev[MAX_DEVICES] = {nullptr}; ///< pointers to all attached devices
 
     struct LoopStats {
       uint8_t loop_count;
@@ -54,7 +54,7 @@ class DeviceManager {
       
       uint8_t i = n_devices;
       do {
-        if( _dev[i - 1] != NULL ) {
+        if( _dev[i - 1] != nullptr ) {
           _dev[i - 1]->update();
          }
       } while( --i ); // stops update() when i==0
@@ -122,7 +122,7 @@ class DeviceManager {
         return _dev[udid];
       }
       else {
-        return NULL;
+        return nullptr;
       }
     }
 

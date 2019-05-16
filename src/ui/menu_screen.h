@@ -25,19 +25,19 @@ size_t getFlashStringLength(const __FlashStringHelper *ifsh)
 //idea: MenuScreen<__FlashStringHelper*>
 //template <class T>
 class MenuScreen : public GraphicsItem{
-    MenuScreen* _parent = NULL;
+    MenuScreen* _parent = nullptr;
     const char* _title = NULL;
     const __FlashStringHelper* _flash_title = NULL;
-    Callback _screen_entered_callback = NULL;
+    Callback _screen_entered_callback = nullptr;
     
   public:
     MenuScreen(MenuScreen* parent, UiContext* context, const char* title)
-      : GraphicsItem(NULL, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
+      : GraphicsItem(nullptr, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
        _parent(parent), _title(title) {
       _flash_title = NULL;
     }
     MenuScreen(MenuScreen* parent, UiContext* context, const __FlashStringHelper* title)
-      : GraphicsItem(NULL, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
+      : GraphicsItem(nullptr, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
        _parent(parent), _flash_title(title) {
       _title = NULL;
     }
@@ -64,7 +64,7 @@ class MenuScreen : public GraphicsItem{
       //  _parent->setDirty(true);
      // }
 
-      if(_screen_entered_callback != NULL) {
+      if(_screen_entered_callback != nullptr) {
         (*_screen_entered_callback)();
       }
       return _parent; 

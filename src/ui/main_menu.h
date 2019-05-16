@@ -11,7 +11,7 @@ class MainMenu : public MenuScreen {
     uint8_t _last_value = 0;
     uint8_t _scroll_speed = 5;
     uint8_t _frames_to_go = 0;
-    MenuScreen* _sub_menus[MAX_SCREENS] = {NULL};
+    MenuScreen* _sub_menus[MAX_SCREENS] = {nullptr};
 
     ////////
     int prev_screen = 0;
@@ -132,19 +132,19 @@ class MainMenu : public MenuScreen {
       // draw the list
       context->display->setDrawColor(2); // xor
       context->display->setCursor(8, list_top - 20);
-      if(_sub_menus[prev_screen] != NULL)
+      if(_sub_menus[prev_screen] != nullptr)
         _sub_menus[prev_screen]->printTitle(context);
           
       context->display->setCursor(8, list_top);
-      if(_sub_menus[_value] != NULL)
+      if(_sub_menus[_value] != nullptr)
         _sub_menus[_value]->printTitle(context);
       
       context->display->setCursor(8, list_top + 20);
-      if(_sub_menus[next_screen] != NULL)
+      if(_sub_menus[next_screen] != nullptr)
         _sub_menus[next_screen]->printTitle(context);
          
       context->display->setCursor(8, list_top + 40);
-      if(_sub_menus[next_next_screen] != NULL)
+      if(_sub_menus[next_next_screen] != nullptr)
         _sub_menus[next_next_screen]->printTitle(context);
          
       // now black out behind the title

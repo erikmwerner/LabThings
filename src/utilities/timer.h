@@ -8,7 +8,7 @@ typedef void(*voidCallback) ();
 class LT_Timer : public LT_Device {
   uint32_t _last_time = 0;
   uint32_t _timeout = 0;
-  voidCallback _callback = NULL;
+  voidCallback _callback = nullptr;
   bool _isSingleShot = false;
   bool _isActive = true;
   
@@ -20,13 +20,13 @@ class LT_Timer : public LT_Device {
       _callback = c;
     }
     
-    void setTimeout(uint32_t interval) {_timeout = interval;}
+    void setTimeout(const uint32_t interval) {_timeout = interval;}
     
     void begin() {
         _last_time = LT_current_time_us;
     }
     
-    void setSingleShot(bool isSingleShot) {
+    void setSingleShot(const bool isSingleShot) {
       _isSingleShot = isSingleShot;
     }
     
@@ -42,7 +42,7 @@ class LT_Timer : public LT_Device {
      void update() {
        if(_isActive) {
         if( (LT_current_time_us - _last_time) >= _timeout) {
-            if (_callback != NULL) {
+            if (_callback != nullptr) {
               (*_callback)();
             }
             if(_isSingleShot) {

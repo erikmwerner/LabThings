@@ -11,17 +11,17 @@ typedef void(*func_ptr) ();
 class MessageHandler {
 
     // list of all attached callback functions
-    func_ptr _function_list[MAX_FUNCTIONS] = { NULL };
-    func_ptr _default_function = NULL;
+    func_ptr _function_list[MAX_FUNCTIONS] = { nullptr };
+    func_ptr _default_function = nullptr;
   public:
     // route the message to
     void handleMessage( int index ) {
       if (index >= 0 && index < MAX_FUNCTIONS) {
-        if(_function_list[index] != NULL) {
+        if(_function_list[index] != nullptr) {
           (_function_list[index])();
         }
         else {
-          if(_default_function != NULL) {
+          if(_default_function != nullptr) {
             (_default_function)();
           }
         }
@@ -44,7 +44,7 @@ class MessageHandler {
     uint8_t getAttachedFunctionCount() {
       uint8_t count = 0;
       for(uint8_t i = 0; i<MAX_FUNCTIONS; ++i) {
-        if(_function_list[i] != NULL) {
+        if(_function_list[i] != nullptr) {
           count++;
         }
       }
@@ -55,7 +55,7 @@ class MessageHandler {
       //uint8_t max_count = sizeof(data)/sizeof(data[0]);
       uint8_t index = 0;
       for(uint8_t i = 0; i<MAX_FUNCTIONS; ++i) {
-        if( (_function_list[i] != NULL) ) {
+        if( (_function_list[i] != nullptr) ) {
           data[index]=i;
           index++;
         }

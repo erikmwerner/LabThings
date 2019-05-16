@@ -14,7 +14,7 @@
 typedef void(*voidCallback) ();
 
 class LT_StateSaver : public LT_Device {
-    voidCallback _callback = NULL;
+    voidCallback _callback = nullptr;
     bool _dirty = false;
     uint32_t _last_eeprom_write_us;
     uint32_t _delayed_write_interval_us = 10000000; //10 s
@@ -41,7 +41,7 @@ class LT_StateSaver : public LT_Device {
     void update() {
       if ( (LT_current_time_us - _last_eeprom_write_us) >= _delayed_write_interval_us ) {
         if (_dirty) {
-          if (_callback != NULL) {
+          if (_callback != nullptr) {
             (*_callback)();
           }
           _last_eeprom_write_us = LT_current_time_us;

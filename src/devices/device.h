@@ -30,7 +30,7 @@ class LT_Device {
     const int8_t UDID(){return _udid;}
     virtual void update() {}
     virtual void begin() {}
-    virtual void* instance() {return NULL;}
+    virtual void* instance() {return nullptr;}
 };
 
 // bring in a global external variable to keep track of time

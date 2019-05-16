@@ -60,7 +60,7 @@ class TextScreen< : public MenuScreen {
 };*/
 
 class TextScreen : public MenuScreen {
-    MenuScreen * _next_page = NULL;
+    MenuScreen * _next_page = nullptr;
   protected:
     const char *_text = NULL;
     const __FlashStringHelper* _flash_text = NULL;
@@ -74,14 +74,14 @@ class TextScreen : public MenuScreen {
       _text = NULL;
     }
     MenuScreen* enter() {
-      if (_next_page != NULL) {
+      if (_next_page != nullptr) {
         return _next_page;
       }
       else {
         return parent();
       }
     }
-    void setNextPage(MenuScreen* next_page) {
+    void setNextPage(const MenuScreen* next_page) {
       _next_page = next_page;
     }
     const char *text() {

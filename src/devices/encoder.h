@@ -12,7 +12,7 @@ class LT_Encoder : public LT_Device {
     volatile uint32_t _t_last_state_change_us = 0;
     volatile uint32_t _t_last_check_us = 0;
     uint32_t _debounce_interval_us = 20000;//20ms
-    Callback _valueChangedCallback = NULL;
+    Callback _valueChangedCallback = nullptr;
     
     uint8_t _old_AB = 0; // use for 16-state
     
@@ -83,7 +83,7 @@ class LT_Encoder : public LT_Device {
       _t_last_check_us = LT_current_time_us;
 */
       if(_position != _last_position) {
-        if(_valueChangedCallback != NULL) {
+        if(_valueChangedCallback != nullptr) {
           (*_valueChangedCallback)();
         }
         _last_position = _position;
