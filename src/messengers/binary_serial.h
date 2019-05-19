@@ -31,12 +31,12 @@ class BinarySerial
   const uint8_t ESC_END = 0xDC; ///<  Transposed frame end
   const uint8_t ESC_ESC = 0xDD; ///<  Transposed frame escape
 
-  enum ERROR
+  enum ERROR : uint8_t
   {
-    EMPTY_PACKET = 0,
-    INVALID_CHECKSUM = 1,
-    MAX_LENGTH_EXCEEDED = 2,
-    SLIP_VIOLATION = 3
+    INVALID_CHECKSUM = 0,
+    MAX_LENGTH_EXCEEDED = 1,
+    SLIP_VIOLATION = 2,
+    MESSAGE_FORMAT = 3
   };
 
   Stream *_com = nullptr;
@@ -77,25 +77,32 @@ class BinarySerial
     }
     else {
       // if there is no data in the packet, ignore it.
-      //if (_error_callback != nullptr)
-      //{
-      //  (*_error_callback)(0);
-      //}
+      /*if (_error_callback != nullptr) {
+        (*_error_callback)(EMPTY_PACKET);
+      }*/
     }
     _msg_idx = 0;
   }
 
-  static uint32_t crc32(uint8_t const *buffer, const uint8_t len)
+  /*static*/ uint32_t crc32(uint8_t const *buffer, const uint8_t len)
   {
     //uint32_t crc = ~0L;
     uint32_t crc = 0xFFFFFFFF;
-    for (int index = 0; index < len; ++index) {
+    for (uint8_t index = 0; index < len; ++index) {
       crc = crc_table[(crc ^ buffer[index]) & 0x0f] ^ (crc >> 4);
       crc = crc_table[(crc ^ (buffer[index] >> 4)) & 0x0f] ^ (crc >> 4);
       crc = ~crc;
     }
-    Serial.print("CRC IS:");
-    Serial.println(crc);
+    /*Serial.print("MSG IDX: ");
+    Serial.print(_msg_idx);
+    for(int i = 0; i < _msg_idx; ++i){
+      Serial.print(" DATA AT [");
+      Serial.print(i);
+      Serial.print("]: ");
+      Serial.print(_message[i]);
+    }
+    Serial.print(" CRC IS:");
+    Serial.println(crc);*/
     return crc;
   }
 
@@ -158,11 +165,14 @@ public:
       encode(*packet);
       ++packet;
     }*/
-
-    encode(checksum);
-    encode(checksum >> 8);
-    encode(checksum >> 16);
-    encode(checksum >> 24);
+    uint8_t *p = (uint8_t*)&checksum;
+    encode(p[0]);
+    encode(p[1]);
+    encode(p[2]);
+    encode(p[3]);
+    //encode(checksum >> 8);
+    //encode(checksum >> 16);
+    //encode(checksum >> 24);
     // tell the receiver the packet is done
     _com->write(END);
   }
@@ -190,16 +200,22 @@ public:
         _escaped = false;
       }
 
-      if (next_byte == END) {
+      else if (next_byte == END) {
         // if it's an END character then we're done with the packet
-        return handleMessage();
+        if(_msg_idx) {
+                handleMessage();
+                return;
+            }
+            else {
+                return;
+            }
       }
       else if (next_byte == ESC) {
         // if it's an ESC character, set escaped flag and wait
         // for another character
         _escaped = true;
+        return;
       }
-      else {
         // finally, store the character in the message buffer
         if (_msg_idx < MAX_MESSAGE_LENGTH) {
           _message[_msg_idx++] = next_byte;
@@ -211,16 +227,19 @@ public:
             (*_error_callback)(MAX_LENGTH_EXCEEDED);
           }
         }
-      }
     }
   }
 
   // pack 16-bits
   template <typename T> 
   void pack16(uint8_t *packet, T input) {
-    *packet =  (uint8_t)input;
-    ++packet;
-    *packet = (uint8_t)(input >> 8);
+    uint8_t *p = (uint8_t*)&input;
+    packet[0] = p[0];
+    packet[1] = p[1];
+
+    //*packet =  (uint8_t)input;
+    //++packet;
+    //*packet = (uint8_t)(input >> 8);
   }
 
   // pack 32-bits
@@ -253,6 +272,18 @@ public:
     sendPacket(packet, 2);
   }
 
+  void sendError(LT::FN_CODE code) {
+    uint8_t packet[2];
+    packet[0] = LT::Error;
+    packet[1] = code;
+    sendPacket(packet, 2);
+  }
+
+  /*!
+  * @brief overloaded sendError function to send error messages
+  * with additional error codes.
+  *
+  */
   void sendError(uint8_t *codes, uint8_t len) {
     uint8_t packet[1+len];
     packet[0] = LT::Error;

@@ -6,10 +6,10 @@ Messages are sent from the master to the slave between start of message (SOM) an
 
 ### Examples:
 Write HIGH to a digital output on port 5:
-`<7,5,1>`
+`<9,5,1>`
 
 Set motor with ID = 3 to -101.5 RPM:
-`<18,3,-101.5>`
+`<20,3,-101.5>`
 
 The first data field contains the command to be executed. Data in subsequent fields depends on the command implementation, and can be accessed using the functions
 getNextArgInt()
@@ -22,7 +22,7 @@ Well behaved implementations should always respond to commands either with an ac
 
 Binary Serial
 ------------
-Data packets are sent between the master and the slave using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. The standard SLIP frame markers are used:
+Data packets are sent between the master and the slave using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. Messages always begin and end with END markers. The standard SLIP frame markers are used:
 
 Hex |	Decimal |	Type Definition	 | Desctiption
 ----|---------|------------------|------------
@@ -31,14 +31,13 @@ Hex |	Decimal |	Type Definition	 | Desctiption
 0xDC | 220 | ESC_END | Transposed frame end
 0xDD | 221 | ESC_ESC |  Transposed frame escape
 
-Messages always begin and end with END markers.
 
 ### Examples:
 Write HIGH to a digital output on port 5:
-`\xC0\x07\x05\x01\crc\crc\crc\crc\xC0`
+`\xC0\x09\x05\x01\crc\crc\crc\crc\xC0`
 
 Set motor with ID = 3 to -101.5 RPM:
-`\xC0\x12\x03\xC2\xCB\x00\x00\crc\crc\crc\crc\xC0`
+`\xC0\x14\x03\xC2\xCB\x00\x00\crc\crc\crc\crc\xC0`
 
 Function codes
 ------------
@@ -74,16 +73,16 @@ Motors |Write Setting |`Write_Setting` |`24` |`0x18` |Write a setting of a motor
 Motors |Read Setting |`Read_Setting` |`25` |`0x19` |Read a setting of a motor
 Motors |Reserved | |`26` |`0x1A` |
 Motors |Reserved | |`27` |`0x1B` |
-Protocols |Enqueue |`Enqueue` |`28` |`0x1C` |Add a function to the queue
-Protocols |Read from queue |`Read_From_Queue` |`29` |`0x1D` |Read a functions from the queue
-Protocols |Dequeue |`Dequeue` |`30` |`0x1E` |Remove a function from the queue
-Protocols |Queue available |`Queue_Available` |`31` |`0x1F` |Read the number of spaces available in the queue
-Protocols |Queue capacity |`Queue_Capacity` |`32` |`0x20` |Read the capacity of the queue
-Protocols |Start Protocol |`Start_Protocol` |`33` |`0x21` |Start a protocol
-Protocols |Stop Protocol |`Stop_Protocol` |`34` |`0x22` |Stop a protocol
-Protocols |Reset Protocol |`Reset_Protocol` |`35` |`0x23` |Reset a protocol
-Protocols |Reserved | |`36` |`0x24` |
-Protocols |Reserved | |`37` |`0x25` |
+Processes |Enqueue |`Enqueue` |`28` |`0x1C` |Add a function to the queue
+Processes |Read from queue |`Read_From_Queue` |`29` |`0x1D` |Read a functions from the queue
+Processes |Dequeue |`Dequeue` |`30` |`0x1E` |Remove a function from the queue
+Processes |Queue available |`Queue_Available` |`31` |`0x1F` |Read the number of spaces available in the queue
+Processes |Queue capacity |`Queue_Capacity` |`32` |`0x20` |Read the capacity of the queue
+Processes |Start Process |`Start_Protocol` |`33` |`0x21` |Start a process
+Processes |Stop Process |`Stop_Protocol` |`34` |`0x22` |Stop a process
+Processes |Reset Process |`Reset_Protocol` |`35` |`0x23` |Reset a process
+Processes |Interrupt Process |`Interrupt_Protocol` |`36` |`0x24` |Pause and interrupt the current process
+Processes |Reserved | |`37` |`0x25` |
 Time |Time Sync |`Time_Sync` |`38` |`0x26` |Send clock sync time
 Time |Time Follow-up |`Time_Followup` |`39` |`0x27` |Send clock sync response time
 Time |Delay Request |`Delay_Request` |`40` |`0x28` |Request transmission delay time

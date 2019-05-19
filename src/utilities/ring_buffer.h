@@ -32,6 +32,8 @@ struct SelectInteger : SelectInteger_<RequiredBits<Max>::value> {};
 // BUFFER_LENGTH must be a power of 2
 // from: http://www.simplyembedded.org/tutorials/interrupt-free-ring-buffer/
 
+// Example: Make a 16-unit ring buffer of unsigned 8-bit ints: RingBuffer<16, uint8_t> buffer;
+
 template <int BUFFER_LENGTH, class T, class TS = typename SelectInteger<BUFFER_LENGTH>::type>
 //template < uint8_t BUFFER_LENGTH , class T >
 class RingBuffer {
@@ -59,7 +61,8 @@ public:
     }
 
     // gets data from the specified index
-    int8_t get(const TS index, T *data) {
+    // does not modify the contents of the buffer
+    int8_t get(const TS index, T *data) const {
         if(index < BUFFER_LENGTH && ( !isEmpty() )) {
             const TS offset = ( (_tail+index) & (BUFFER_LENGTH - 1));
             *data = _buffer[offset];
@@ -109,7 +112,7 @@ public:
         }
     }
     
-    int8_t first(T *data) {
+    int8_t first(T *data) const {
       if(!isEmpty() ) {
             const TS offset = (_head - 1 & (BUFFER_LENGTH - 1));
             *data = _buffer[offset];
@@ -120,7 +123,7 @@ public:
         }
     }
     
-    int8_t last(T *data) {
+    int8_t last(T *data) const {
        if(!isEmpty() ) {
             const TS offset = (_tail & (BUFFER_LENGTH - 1));
             *data = _buffer[offset];
@@ -141,6 +144,21 @@ public:
         return count() == 0 ? true : false;
     }
 
+    /*! Clears the buffer. If the optional
+    * full reset boolean is set to true, also
+    * zeros all the command memory space
+    */
+    void reset (const bool full = false)
+    {
+    _head = 0;
+    _tail   = 0;
+    //m_next  = 0;
+    //m_count = 0;
+    //m_remaining = 0;
+    if (full) {
+      memset (_buffer, 0, sizeof (_buffer));
+    }
+  }
 };
 
 #endif // End __RING_BUFFER_H__ include guard

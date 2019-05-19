@@ -101,10 +101,10 @@ namespace LT {
     Dequeue               = 0x1E, // (30) Remove a function from the queue
     Queue_Available       = 0x1F, // (31) Read the number of spaces available in the queue
     Queue_Capacity        = 0x20, // (32) Read the capacity of the queue
-    Start_Protocol        = 0x21, // (33) Start a protocol
-    Stop_Protocol         = 0x22, // (34) Stop a protocol
-    Reset_Protocol        = 0x23, // (35) Reset a protocol
-    // (36) reserved
+    Start_Process        = 0x21, // (33) Start a process
+    Stop_Process         = 0x22, // (34) Stop a process
+    Reset_Process        = 0x23, // (35) Reset a process
+    Interrupt_Process   = 0x24,  // (36) Pause and interrupt the current process
     // (37) reserved
     Time_Sync             = 0x26, // (38) Send clock sync time
     Time_Followup         = 0x27, // (39) Send clock sync response time

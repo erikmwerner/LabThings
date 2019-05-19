@@ -12,8 +12,27 @@
 #include "utilities/fast_digital.h"
 #endif
 
-// define debug printing to print diagnostic information to the serial port
-//#define DEBUG_PRINT
+ #if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#else
+#include "WProgram.h"
+#endif
+
+//macro to allow debugging via Serial1 to be switched on or off
+//comment out DEBUG_PRINT to turn off
+#define DEBUG_PRINT
+#ifdef DEBUG_PRINT
+  #define DPRINTLN(a) (Serial1.println(a))
+  #define DPRINT(a) (Serial1.print(a))
+  #define DPRINTF(a) (Serial1.print(F(a)))
+  #define DPRINTLNF(a) (Serial1.println(F(a)))
+  #define DEBUG_BAUD 38400 //9600 // use 9600 for soft serial echo, 115k for bluetooth
+#else
+  #define DPRINTLN(a) 
+  #define DPRINT(a) 
+  #define DPRINTF(a)
+  #define DPRINTLNF(a)
+#endif
 
 uint32_t LT_current_time_us;
 const static float LT_VERSION = 0.15;
@@ -44,6 +63,7 @@ const static float LT_VERSION = 0.15;
 #include "messengers/ascii_serial.h"
 #include "messengers/binary_serial.h"
 #include "messengers/message_handler.h"
+#include "messengers/process_manager.h"
 
 #include "utilities/noise_maker.h"
 #include "utilities/streaming.h"
