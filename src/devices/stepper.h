@@ -91,7 +91,7 @@ class LT_Stepper : public LT_Device {
     const int8_t enable_pin = -1) : LT_Device(id), _step_pin(step_pin), 
     _dir_pin(dir_pin), _enable_pin(enable_pin) {}
     
-    LT::DeviceType type() const { return LT::Stepper; }
+    virtual LT::DeviceType type() const { return LT::Stepper; }
     
     void begin() {
         _t_last_step = LT_current_time_us;

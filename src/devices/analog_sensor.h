@@ -17,7 +17,7 @@ class LT_AnalogSensor : public LT_Sensor {
     LT_AnalogSensor(const uint8_t id, const uint8_t pin) 
     : LT_Sensor(id), _pin(pin) {}
     
-    LT::DeviceType type() const { return LT::AnalogSensor; }
+    virtual LT::DeviceType type() const { return LT::AnalogSensor; }
     
     void begin() {
       pinMode(_pin, INPUT);

@@ -11,7 +11,7 @@ class LT_DigitalOutput : public LT_Device {
   public:
     LT_DigitalOutput(const uint8_t id, const uint8_t pin) : LT_Device(id), _pin(pin) {}
     
-    LT::DeviceType type() const { return LT::DigitalOutput; }
+    virtual LT::DeviceType type() const { return LT::DigitalOutput; }
     
     void begin() {
       pinMode(_pin, OUTPUT);

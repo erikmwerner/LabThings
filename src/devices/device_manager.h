@@ -8,19 +8,30 @@ class DeviceManager {
     int8_t n_devices = 0; ///< count of attached devices
     LT_Device* _dev[MAX_DEVICES] = {nullptr}; ///< pointers to all attached devices
 
-    struct LoopStats {
+    struct SystemStats {
       uint8_t loop_count;
       uint32_t accumulator;
       uint32_t max_loop_time;
       uint32_t avg_loop_time;
-      LoopStats() : loop_count(0), accumulator(0), max_loop_time(0),avg_loop_time(0) {} 
+      uint32_t uptime_low;
+      uint32_t uptime_high;
+      SystemStats() : loop_count(0), accumulator(0), max_loop_time(0),
+      avg_loop_time(0), uptime_low(0), uptime_high(0) {} 
       void update(const uint32_t now) 
       {
         ++loop_count;
-        uint32_t dt = now - LT_current_time_us;
+        const uint32_t dt = now - LT_current_time_us;
+        // update slowest loop time
         if(dt > max_loop_time) {
           max_loop_time = dt;
         }
+        // update uptime clock
+        if(uptime_low > LT_current_time_us) {
+          // micros has rolled over
+          uptime_high++;
+        }
+        uptime_low = LT_current_time_us;
+        // update average loop time
         accumulator += dt;
         if(loop_count == 0) { // rolls over at 256 updates
           avg_loop_time = accumulator >> 8; // divide by 256
@@ -33,7 +44,7 @@ class DeviceManager {
         }
       }
     };
-    LoopStats _loop_stats;
+    SystemStats _system_stats;
 
   public:
   
@@ -59,7 +70,7 @@ class DeviceManager {
          }
       } while( --i ); // stops update() when i==0
 
-      _loop_stats.update(micros());
+      _system_stats.update(micros());
     }
     
     
@@ -126,7 +137,7 @@ class DeviceManager {
       }
     }
 
-    LoopStats getStatus() const {return _loop_stats;}
+    SystemStats getStatus() const {return _system_stats;}
 };
 
 #endif //End __DEVICE_MANAGER_H__ include guard

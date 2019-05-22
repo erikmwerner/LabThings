@@ -40,12 +40,13 @@ void setup() {
   messenger.setMessageReceivedCallback(onMessageReceived);
 
   // set the callback functions that implement commands
-  handler.attachFunction(Fn_Get_Controller_Name, onGetControllerName); // 1
-  handler.attachFunction(Fn_Get_Controller_FW, onGetControllerFirmwareVersion); // 2
-  handler.attachFunction(Fn_Set_Stepper_RPM, onSetMotorSpeed); // 18
-  handler.attachFunction(Fn_Get_Stepper_RPM, onGetMotorSpeed); // 19
-  handler.attachFunction(Fn_Set_Stepper_Position, onSetMotorPosition); // 20
-  handler.attachFunction(Fn_Get_Stepper_Position, onGetMotorPosition); // 21
+  handler.attachFunction(LT::Read_Name, onGetControllerName);
+  handler.attachFunction(LT::Read_Name, onGetControllerFirmwareVersion);
+  handler.attachFunction(LT::Read_Device_Count, onGetDeviceCount);
+  handler.attachFunction(LT::Write_Speed, onSetMotorSpeed);
+  handler.attachFunction(LT::Read_Speed, onGetMotorSpeed);
+  handler.attachFunction(LT::Write_Position, onSetMotorPosition);
+  handler.attachFunction(LT::Read_Position, onGetMotorPosition);
   handler.attachDefaultFunction(onUnknownCommand);
 
   // add the devides to the device manager
@@ -74,17 +75,17 @@ void onMessageReceived(int msg_id) {
 }
 
 void onGetControllerName() {
-  Serial << SOM << Fn_Get_Controller_Name
+  Serial << SOM << LT::Read_Name
          << SEP << controllerName << EOM;
 }
 
 void onGetControllerFirmwareVersion() {
-  Serial << SOM << Fn_Get_Controller_FW
+  Serial << SOM << LT::Read_Name
          << SEP << LT_VERSION << EOM;
 }
 
 void onGetDeviceCount() {
-  Serial << SOM << Fn_Get_Device_Count
+  Serial << SOM << LT::Read_Device_Count
          << SEP << device_manager.deviceCount() << EOM;
 }
 
@@ -98,7 +99,7 @@ void onSetMotorSpeed() {
       return;
     }
   }
-  printError("18");
+  printError((uint8_t)LT::Write_Speed);
 }
 void onGetMotorSpeed() {
   int id = messenger.getNextArgInt();
@@ -106,13 +107,13 @@ void onGetMotorSpeed() {
   if (LT_Device* d = device_manager.device(id)) {
     if (d->type() == LT::Stepper) {
       LT_Stepper *stepper = d->instance();
-      Serial << SOM << Fn_Get_Stepper_RPM
+      Serial << SOM << LT::Read_Speed
              << SEP << stepper->UDID()
              << SEP <<  stepper->getSpeed() << EOM;
       return;
     }
   }
-  printError("19");
+  printError((uint8_t)LT::Read_Speed);
 }
 
 void onSetMotorPosition() {
@@ -126,7 +127,7 @@ void onSetMotorPosition() {
       return;
     }
   }
-  printError("20");
+  printError((uint8_t)LT::Write_Position);
 }
 
 void onGetMotorPosition() {
@@ -134,14 +135,14 @@ void onGetMotorPosition() {
   if (LT_Device* d = device_manager.device(id)) {
     if (d->type() == LT::Stepper) {
       LT_Stepper *stepper = d->instance();
-      Serial << SOM << Fn_Get_Stepper_Position
+      Serial << SOM << LT::Read_Position
              << SEP << stepper->UDID()
              << SEP << stepper->getPosition()
              << SEP << stepper->distanceToGo() << EOM;
       return;
     }
   }
-  printError("21");
+  printError((uint8_t)LT::Read_Position);
 }
 
 

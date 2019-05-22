@@ -17,7 +17,7 @@ class LT_DigitalSensor : public LT_Sensor {
     LT_DigitalSensor(const uint8_t id, const uint8_t pin) 
     : LT_Sensor(id), _pin(pin) {}
     
-    LT::DeviceType type() const { return LT::DigitalSensor; }
+    virtual LT::DeviceType type() const { return LT::DigitalSensor; }
     
     void begin() {
       pinMode(_pin, INPUT);

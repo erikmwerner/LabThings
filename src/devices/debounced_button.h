@@ -29,7 +29,7 @@ class LT_DebouncedButton : public LT_Device {
     LT_DebouncedButton(const uint8_t id, const uint8_t pin, const uint8_t pullup_enable = false)
     : LT_Device(id), _pin(pin), _pullup_enable(pullup_enable) {}
     
-    LT::DeviceType type() const { return LT::DebouncedButton; }
+    virtual LT::DeviceType type() const { return LT::DebouncedButton; }
     
     void setButtonReleasedCallback(voidCallback c) {
       _callback_released = c;

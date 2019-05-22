@@ -24,7 +24,7 @@ class LT_Encoder : public LT_Device {
     LT_Encoder(const uint8_t id, const uint8_t pin_a, const uint8_t pin_b, const uint8_t pullup_enable = false)
       : LT_Device(id), _pin_a(pin_a), _pin_b(pin_b), _pullup_enable(pullup_enable) {}
       
-      LT::DeviceType type() const { return LT::Encoder; }
+    virtual LT::DeviceType type() const { return LT::Encoder; }
       
     void setValueChangedCallback(Callback c) {
       _valueChangedCallback = c;

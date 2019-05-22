@@ -8,8 +8,8 @@ void setup() {
   Serial.begin(115200);
   messenger.setMessageReceivedCallback(onMessageReceived);
   // put your setup code here, to run once:
-  handler.attachFunction(Fn_Set_Digital_Output, onSetDigitalOutput);
-  handler.attachFunction(Fn_Get_Digital_Output, onGetDigitalOutput);
+  handler.attachFunction(LT::Write_Digital_Output, onSetDigitalOutput);
+  handler.attachFunction(LT::Read_Digital_Output, onGetDigitalOutput);
   device_manager.attachDevice(&output);
   Serial.println("hello world");
 }
@@ -45,7 +45,7 @@ void onGetDigitalOutput() {
     if (LT_DigitalOutput *valve = d->instance()) {
       //Serial<<"<,"<<Fn_Get_Digital_Output<<","<<valve->UDID()<<","<<valve->getValue()<<">"<<endl;
       Serial.print("<");
-      Serial.print(Fn_Get_Digital_Output);
+      Serial.print(LT::Read_Digital_Output);
       Serial.print(",");
       Serial.print(valve->UDID());
       Serial.print(",");

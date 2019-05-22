@@ -31,39 +31,59 @@ getNextArgChar	KEYWORD2
 
 BinarySerial	KEYWORD1
 setMessageReceivedCallback	KEYWORD2
+setMessageErrorCallback	KEYWORD2
 setMessageSentCallback	KEYWORD2
 
-Fn_Read_ID	LITERAL1
-Fn_Write_Name	LITERAL1
-Fn_Read_Name	LITERAL1
-Fn_Read_Version	LITERAL1
-Fn_Read_Device_Count	LITERAL1
-Fn_Read_Device_Type	LITERAL1
-Fn_Read_System_Status	LITERAL1
-Fn_Write_Digital_Output	LITERAL1
-Fn_Read_Digital_Output	LITERAL1
-Fn_Read_Digital_Input	LITERAL1
-Fn_Write_PWM	LITERAL1
-Fn_Read_PWM	LITERAL1
-Fn_Read_ADC	LITERAL1
-Fn_Write_Sensor_Setting	LITERAL1
-Fn_Read_Sensor_Setting	LITERAL1
-Fn_Read_Sensor_Value	LITERAL1
-Fn_Write_Speed	LITERAL1
-Fn_Read_Speed	LITERAL1
-Fn_Write_Position	LITERAL1
-Fn_Read_Position	LITERAL1
-Fn_Write_Setting	LITERAL1
-Fn_Read_Setting	LITERAL1
-Fn_Enqueue	LITERAL1
-Fn_Read_From_Queue	LITERAL1
-Fn_Dequeue	LITERAL1
-Fn_Queue_Available	LITERAL1
-Fn_Queue_Capacity	LITERAL1
-Fn_Start_Protocol	LITERAL1
-Fn_Stop_Protocol	LITERAL1
-Fn_Reset_Protocol	LITERAL1
-Fn_User_Function	LITERAL1
+FN_CODE	LITERAL1
+Read_ID	LITERAL1
+Write_Name	LITERAL1
+Read_Name	LITERAL1
+Read_Version	LITERAL1
+Read_Device_Count	LITERAL1
+Read_Device_Type	LITERAL1
+Read_Status	LITERAL1
+Acknowledge	LITERAL1
+Error	LITERAL1
+Write_Digital_Output	LITERAL1
+Read_Digital_Output	LITERAL1
+Read_Digital_Input	LITERAL1
+Write_PWM	LITERAL1
+Read_PWM	LITERAL1
+Read_ADC	LITERAL1
+Write_Sensor_Setting	LITERAL1
+Read_Sensor_Setting	LITERAL1
+Read_Sensor_Value	LITERAL1
+Write_Speed	LITERAL1
+Read_Speed	LITERAL1
+Write_Position	LITERAL1
+Read_Position	LITERAL1
+Write_Setting	LITERAL1
+Read_Setting	LITERAL1
+
+Go_To	LITERAL1
+Enqueue	LITERAL1
+Read_From_Queue	LITERAL1
+Dequeue	LITERAL1
+Queue_Info	LITERAL1
+Start_Process	LITERAL1
+Stop_Process	LITERAL1
+Reset_Process	LITERAL1
+Interrupt_Process	LITERAL1
+Process_Info	LITERAL1
+
+Time_Sync	LITERAL1
+Time_Followup	LITERAL1
+Delay_Request	LITERAL1
+Delay_Response	LITERAL1
+User_function	LITERAL1
+
+#######################################
+# Syntax for process manager
+#######################################
+
+ProcessManager	KEYWORD1
+setProcessChangedCallback	KEYWORD2
+setProcessErrorCallback	KEYWORD2
 
 #######################################
 # Syntax for devices
@@ -104,7 +124,7 @@ getValue	KEYWORD2
 LT_DigitalSensor	KEYWORD1
 setPolling	KEYWORD2
 setPollingIntervalUs	KEYWORD2
-setNewSampleCallback	KEYWORD2
+setNewDataCallback	KEYWORD2
 getSample	KEYWORD2
 
 LT_Stepper	KEYWORD1
@@ -136,8 +156,9 @@ UiContext	KEYWORD1
 
 MainMenu	KEYWORD1
 setCurrentScreen	KEYWORD2
-setSleepTimeout	KEYWORD2
-setHomeTimeout	KEYWORD2
+setScreenSaverEnabled	KEYWORD2
+setScreenSaverTimeout	KEYWORD2
+setHomeScreenTimeout	KEYWORD2
 currentScreen	KEYWORD2
 setHomeScreen	KEYWORD2
 increment	KEYWORD2

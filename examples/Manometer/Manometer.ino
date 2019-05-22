@@ -13,24 +13,28 @@ UiContext context(&u8g2);
 Ui menu(device_manager.registerDevice(), context);
 
 MainMenu<3> screen_main(NULL, &context, "Menu");
-InputScreen<float> inputScreen1(&screen_main, "Sensor 1", -30.0, 30.0);
-InputScreen<float> inputScreen2(&screen_main, "Sensor 2", -30.0, 30.0);
-GraphScreen<int, 64> screen_graph(&screen_main, "Graph", "Time", "Pressure (psig)");
+InputScreen<float> inputScreen1(&screen_main, &context, "Sensor 1", -30.0, 30.0);
+InputScreen<float> inputScreen2(&screen_main, &context, "Sensor 2", -30.0, 30.0);
+MenuScreen screen_graph(&screen_main, &context, "Graph");
+GraphItem<uint16_t, 128> graph(&screen_graph, "Graph", "Time", "Pressure (psig)");;
+//GraphScreen<int, 64> screen_graph(&screen_main, &context, "Graph", "Time", "Pressure (psig)");
 
 void setup() {
   Serial.begin(115200);
   menu.setCurrentScreen(&screen_main);
-  menu.setSleepTimeout(0); // prevent sleeping screen
+  menu.setScreenSaverTimeout(0); // prevent sleeping screen
 
   screen_main.addMenu(&inputScreen1);
   screen_main.addMenu(&inputScreen2);
   screen_main.addMenu(&screen_graph);
 
-  device_manager.attachDevice(sensor1.UDID(), &sensor1);
-  device_manager.attachDevice(sensor2.UDID(), &sensor2);
-  device_manager.attachDevice(encoder.UDID(), &encoder);
-  device_manager.attachDevice(button.UDID(), &button);
-  device_manager.attachDevice(menu.UDID(), &menu);
+  screen_graph.addChild(&graph);
+
+  device_manager.attachDevice(&sensor1);
+  device_manager.attachDevice(&sensor2);
+  device_manager.attachDevice(&encoder);
+  device_manager.attachDevice(&button);
+  device_manager.attachDevice(&menu);
 
   encoder.setValueChangedCallback(onEncoderValueChanged);
   button.setButtonReleasedCallback(onButtonReleased);
@@ -38,8 +42,8 @@ void setup() {
   sensor1.setPolling(1000000);
   sensor2.setPolling(1000000);
 
-  sensor1.setNewSampleCallback(onSensor1Data);
-  sensor2.setNewSampleCallback(onSensor2Data);
+  sensor1.setNewDataCallback(onSensor1Data);
+  sensor2.setNewDataCallback(onSensor2Data);
 }
 
 void loop() {
@@ -68,7 +72,7 @@ void onSensor1Data(int value) {
   //Serial.println(value);
   float psi = convertToPSI(value);
   inputScreen1.setValue(psi);
-  screen_graph.addDataPoint( (LT_current_time_us/1000) , psi);
+  graph.addDataPoint( (LT_current_time_us/1000) , psi);
 }
 
 

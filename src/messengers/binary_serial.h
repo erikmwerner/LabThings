@@ -12,15 +12,12 @@
 // <crc>
 // <END>
 
+#include "../utilities/crc.h"
+
 #define MAX_MESSAGE_LENGTH 64
 
 typedef void (*intCallback)(int);
 
-const uint32_t crc_table[16] = { ///<  16-entry LUT calculated by pycrc to speed up calculations
-    0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
-    0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
-    0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c,
-    0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c};
 /*!
 *
 */
@@ -57,10 +54,10 @@ class BinarySerial
     if (_msg_idx > 4) {
       // we have a packed of length _msg_idx
       //check the crc
-      uint32_t checksum = _message[_msg_idx - 4];
-      checksum |= ((uint32_t)_message[_msg_idx - 3]) << 8 & 0xff00;
-      checksum |= ((uint32_t)_message[_msg_idx - 2]) << 16 & 0xff0000;
-      checksum |= ((uint32_t)_message[_msg_idx - 1]) << 24 & 0xff000000;
+      uint32_t checksum = (uint32_t)(_message[_msg_idx - 4]) & 0xFF;
+      checksum |= (uint32_t)(_message[_msg_idx - 3]) << 8 & 0xFF00;
+      checksum |= (uint32_t)(_message[_msg_idx - 2]) << 16 & 0xFF0000;
+      checksum |= (uint32_t)(_message[_msg_idx - 1]) << 24 & 0xFF000000;
       if (checksum == crc32(_message, _msg_idx - 4)) {
         if (_rx_callback != nullptr) {
           //handle the message with the callback functin
@@ -82,28 +79,6 @@ class BinarySerial
       }*/
     }
     _msg_idx = 0;
-  }
-
-  /*static*/ uint32_t crc32(uint8_t const *buffer, const uint8_t len)
-  {
-    //uint32_t crc = ~0L;
-    uint32_t crc = 0xFFFFFFFF;
-    for (uint8_t index = 0; index < len; ++index) {
-      crc = crc_table[(crc ^ buffer[index]) & 0x0f] ^ (crc >> 4);
-      crc = crc_table[(crc ^ (buffer[index] >> 4)) & 0x0f] ^ (crc >> 4);
-      crc = ~crc;
-    }
-    /*Serial.print("MSG IDX: ");
-    Serial.print(_msg_idx);
-    for(int i = 0; i < _msg_idx; ++i){
-      Serial.print(" DATA AT [");
-      Serial.print(i);
-      Serial.print("]: ");
-      Serial.print(_message[i]);
-    }
-    Serial.print(" CRC IS:");
-    Serial.println(crc);*/
-    return crc;
   }
 
 public:
@@ -232,7 +207,7 @@ public:
 
   // pack 16-bits
   template <typename T> 
-  void pack16(uint8_t *packet, T input) {
+  static void pack16(uint8_t *packet, T input) {
     uint8_t *p = (uint8_t*)&input;
     packet[0] = p[0];
     packet[1] = p[1];
@@ -244,7 +219,7 @@ public:
 
   // pack 32-bits
   template <typename T> 
-  void pack32(uint8_t *packet, T input) {
+  static void pack32(uint8_t *packet, T input) {
     uint8_t *p = (uint8_t*)&input;
     packet[0] = p[0];
     packet[1] = p[1];
@@ -253,21 +228,69 @@ public:
   }
 
   // get 16-bit value
-  uint16_t get16(uint8_t *packet) {
-    uint16_t value = (uint16_t)packet[0] | (uint16_t)packet[1] << 8;
+  static uint16_t get16(uint8_t *packet) {
+    uint16_t value = ( (uint16_t)(packet[0]) & 0xFF ) | ( (uint16_t)(packet[1]) << 8 & 0xFF00 );
     return value;
   }
 
   // get 32-bit value
-  uint32_t get32(uint8_t *packet) {
-    uint32_t value = (uint32_t)packet[0];
-    value |= (uint32_t)packet[1] << 8;
-    value |= (uint32_t)packet[2] << 16;
-    value |= (uint32_t)packet[3] << 24;
+  static uint32_t get32(uint8_t *packet) {
+    uint32_t value = (uint32_t)(packet[0]) & 0xFF;
+    value |= (uint32_t)(packet[1]) << 8 & 0xFF00;
+    value |= (uint32_t)(packet[2]) << 16 & 0xFF0000;
+    value |= (uint32_t)(packet[3]) << 24 & 0xFF000000;
+    Serial.print("GOT32");
+    Serial.println(value, HEX);
     return value;
   }
 
-  void sendAcknowledge(uint8_t code) {
+  // get 32-bit value
+  /*static uint32_t getFloat(uint8_t *packet) {
+    float value = (float)(packet[0]) & 0xFF;
+    value |= (float)(packet[1]) << 8 & 0xFF00;
+    value |= (float)(packet[2]) << 16 & 0xFF0000;
+    value |= (float)(packet[3]) << 24 & 0xFF000000;
+    Serial.print("GOTFLOAT");
+    Serial.println(value, HEX);
+    return value;
+  }*/
+
+  union FourByteUnion {
+    float    m_float;
+    uint32_t m_uint32;
+    int32_t   m_int32;
+    uint8_t  m_bytes[4];
+};
+
+  template <typename T> unsigned int write_anything (uint8_t *packet, const T& value)
+{
+    const uint8_t* p = (const uint8_t*)&value;
+    unsigned int i;
+    for (i = 0; i < sizeof(value); i++)
+        packet[i] = p[i];
+        //EEPROM.write(ee++, *p++);
+    return i;
+}
+
+template <typename T> unsigned int read_anything2 (uint8_t *packet, T& value)
+{
+  value = *(T*)(packet);
+  return sizeof(value);
+}
+
+template <typename T> unsigned int read_anything (uint8_t *packet, T& value)
+{
+    uint8_t* p = (uint8_t*)&value;
+    unsigned int i;
+    for (i = 0; i < sizeof(value); i++) {
+      //*p++ = packet[i];//EEPROM.read(ee++);
+        p[i] = packet[i];
+        //++p;
+    }
+    return i;
+}
+
+  void sendAcknowledge(LT::FN_CODE code) {
     uint8_t packet[2] = {LT::Acknowledge, code};
     sendPacket(packet, 2);
   }

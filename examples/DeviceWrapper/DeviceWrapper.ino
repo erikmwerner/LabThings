@@ -53,9 +53,6 @@ class LT_SPISensor : public TruStabilityPressureSensor, public LT_Device {
     // subclasses of LT_Device must implement type()
     LT::DeviceType type() const { return (LT::DeviceType)(LT::UserType + 1); }
 
-    // it is not required to implement instance(), but programs using messengers may need it
-    virtual void* instance() { return this; }
-
     // implement library-specific functions in begin, update, or other added functions
     void begin() {
       TruStabilityPressureSensor::begin();

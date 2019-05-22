@@ -5,7 +5,7 @@
 
 //extern "C" {
 // callback functions always follow the signature: void cmd(void);
-typedef void(*func_ptr) ();
+typedef void(*func_ptr) (const void* sender);
 //};
 
 class MessageHandler {
@@ -14,15 +14,20 @@ class MessageHandler {
     func_ptr _function_list[MAX_FUNCTIONS] = { nullptr };
     func_ptr _default_function = nullptr;
   public:
+
+// overload to handle messages without a sender specified
+  void handleMessage(int index) {
+    handleMessage(nullptr, index);
+  }
     // route the message to
-    void handleMessage( int index ) {
+    void handleMessage( void* sender, int index ) {
       if (index >= 0 && index < MAX_FUNCTIONS) {
         if(_function_list[index] != nullptr) {
-          (_function_list[index])();
+          (_function_list[index])(sender);
         }
         else {
           if(_default_function != nullptr) {
-            (_default_function)();
+            (_default_function)(sender);
           }
         }
       }

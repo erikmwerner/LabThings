@@ -22,7 +22,7 @@ Well behaved implementations should always respond to commands either with an ac
 
 Binary Serial
 ------------
-Data packets are sent between the master and the slave using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. Messages always begin and end with END markers. The standard SLIP frame markers are used:
+Data packets are sent between the master and the slave using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. Bytes are sent in order of least significant to most significant (little-endian). Messages always begin and end with END markers. The standard SLIP frame markers are used:
 
 Hex |	Decimal |	Type Definition	 | Desctiption
 ----|---------|------------------|------------
@@ -63,26 +63,26 @@ GPIO |Read ADC |`Read_ADC` |`14` |`0x0E` |Read a value from an analog input
 GPIO |Write Sensor Setting |`Write_Sensor_Setting` |`15` |`0x0F` |Write a setting to a sensor. Common examples include: if polling is enabled, the polling interval, sensor resolution
 GPIO |Read Sensor Setting |`Read_Sensor_Setting` |`16` |`0x10` |Read a sensor setting
 GPIO |Read Sensor Value |`Read_Sensor_Value` |`17` |`0x11` |Read a value from a sensor
-GPIO |Reserved | |`18` |`0x12` |
-GPIO |Reserved | |`19` |`0x13` |
-Motors |Write Speed |`Write_Speed` |`20` |`0x14` |Set the speed of a motor
-Motors |Read Speed |`Read_Speed` |`21` |`0x15` |Read the speed of a motor
-Motors |Write Position |`Write_Position` |`22` |`0x16` |Set the position of a motor
-Motors |Read Position |`Read_Position` |`23` |`0x17` |Read the position of a motor
-Motors |Write Setting |`Write_Setting` |`24` |`0x18` |Write a setting of a motor
-Motors |Read Setting |`Read_Setting` |`25` |`0x19` |Read a setting of a motor
-Motors |Reserved | |`26` |`0x1A` |
-Motors |Reserved | |`27` |`0x1B` |
+Motors |Write Speed |`Write_Speed` |`18` |`0x12` |Set the speed of a motor
+Motors |Read Speed |`Read_Speed` |`19` |`0x13` |Read the speed of a motor
+Motors |Write Position |`Write_Position` |`20` |`0x14` |Set the position of a motor
+Motors |Read Position |`Read_Position` |`21` |`0x15` |Read the position of a motor
+Motors |Write Setting |`Write_Setting` |`22` |`0x16` |Write a setting of a motor
+Motors |Read Setting |`Read_Setting` |`23` |`0x17` |Read a setting of a motor
+Reserved |Reserved | |`24` |`0x18` |
+Reserved |Reserved | |`25` |`0x19` |
+Reserved |Reserved | |`26` |`0x1A` |
+Processes |Go To |`Go_To` |`27` |`0x1B` |Add a function to the queue
 Processes |Enqueue |`Enqueue` |`28` |`0x1C` |Add a function to the queue
 Processes |Read from queue |`Read_From_Queue` |`29` |`0x1D` |Read a functions from the queue
 Processes |Dequeue |`Dequeue` |`30` |`0x1E` |Remove a function from the queue
-Processes |Queue available |`Queue_Available` |`31` |`0x1F` |Read the number of spaces available in the queue
-Processes |Queue capacity |`Queue_Capacity` |`32` |`0x20` |Read the capacity of the queue
-Processes |Start Process |`Start_Protocol` |`33` |`0x21` |Start a process
-Processes |Stop Process |`Stop_Protocol` |`34` |`0x22` |Stop a process
-Processes |Reset Process |`Reset_Protocol` |`35` |`0x23` |Reset a process
-Processes |Interrupt Process |`Interrupt_Protocol` |`36` |`0x24` |Pause and interrupt the current process
-Processes |Reserved | |`37` |`0x25` |
+Processes |Queue Info |`Queue_Info` |`31` |`0x1F` |Read information about the queue
+Processes |Start Process |`Start_Process` |`32` |`0x20` |Start a process
+Processes |Stop Process |`Stop_Process` |`33` |`0x21` |Stop a process
+Processes |Reset Process |`Reset_Process` |`34` |`0x22` |Reset a process
+Processes |Interrupt Process |`Interrupt_Process` |`35` |`0x23` |Pause and interrupt the current process
+Processes |Process Info |`Process_Info`|`36` |`0x24` |
+Reserved |Reserved | |`37` |`0x25` |
 Time |Time Sync |`Time_Sync` |`38` |`0x26` |Send clock sync time
 Time |Time Follow-up |`Time_Followup` |`39` |`0x27` |Send clock sync response time
 Time |Delay Request |`Delay_Request` |`40` |`0x28` |Request transmission delay time

@@ -24,7 +24,7 @@ class LT_AnalogOutput : public LT_DigitalOutput {
     LT_AnalogOutput(const uint8_t id, const uint8_t pin) 
     : LT_DigitalOutput(id, pin) {}
     #endif
-    LT::DeviceType type() const { return LT::AnalogOutput; }
+    virtual LT::DeviceType type() const { return LT::AnalogOutput; }
     
     #if defined(ARDUINO_ARCH_ESP32)
     void begin() {
