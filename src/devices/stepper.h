@@ -79,7 +79,7 @@ class LT_Stepper : public LT_Device {
         }
     }
     
-    void checkDirection(double rpm) {
+    void checkDirection(float rpm) {
       bool isCCW = ( rpm > 0 );
       if( isCCW != _direction ) {
         _direction = isCCW;
@@ -135,7 +135,7 @@ class LT_Stepper : public LT_Device {
       _resolution = resolution;
     }
     
-    void setSpeed(double rpm) {
+    void setSpeed(float rpm) {
         // resolution is the number of steps to make a revolution
         // (1 rev / 1 min) * (1 min / 60,000,000 us) * (_resolution / 1 rev) = _resolution (steps) / us
         if(rpm == 0) {
@@ -148,14 +148,14 @@ class LT_Stepper : public LT_Device {
           }
           else {}
           
-          _interval = 60000000.0 / ( (double)(_resolution) * rpm);
+          _interval = 60000000.0 / ( (float)(_resolution) * rpm);
           _t_last_step = LT_current_time_us;
           _running = true;
         }
     }
     
-    double getSpeed() {
-      double rpm = 60000000.0 / ( (double)(_resolution) * _interval);
+    float getSpeed() {
+      float rpm = 60000000.0 / ( (float)(_resolution) * _interval);
       return rpm;
     }
     
@@ -172,7 +172,7 @@ class LT_Stepper : public LT_Device {
     }
     
     // take the specified number of steps. use negative (-) for anti-clockwise rotation
-    void rotate(int16_t steps, double rpm) {
+    void rotate(int16_t steps, float rpm) {
       // save the starting point
       if(steps == 0 || rpm == 0) return;
       if(steps < 0) {

@@ -5,6 +5,15 @@
 
 typedef void (*intCallback)(int);
 
+namespace Process_Info {
+  enum INFO_CODE : uint8_t {
+    No_Type = 0,
+    Command_Started = 1,
+    Command_Ended = 2, 
+    Process_Ended = 3
+  };
+}
+
 struct CommandData{
   uint32_t duration;
   uint32_t data;
@@ -53,6 +62,7 @@ public:
       return nullptr;
     }
   }
+  uint8_t count() const { return _count; }
 };
 
 template<uint8_t BUFFER_LENGTH, uint8_t INTERRUPT_COUNT, uint8_t INTERRUPT_LENGTH>
@@ -60,6 +70,7 @@ class ProcessManager {
 
   RingBuffer<BUFFER_LENGTH, CommandData> _buffer;
   CommandData _current;
+  CommandData _last;
   CommandData _waiting;
   ProcessVector<INTERRUPT_LENGTH> _interrupts[INTERRUPT_COUNT];
   bool _running = false; ///< flag to track if the protocol is currrently running
@@ -68,7 +79,8 @@ class ProcessManager {
   uint32_t _last_command_start_time = 0; ///< the system time in microseconds that the last command was started
   uint32_t _interrupt_start_time = 0;
 
-  intCallback _process_changed_callback = nullptr;
+  intCallback _command_started_callback = nullptr;
+  intCallback _command_ended_callback = nullptr;
   intCallback _process_ended_callback = nullptr;
 
 public:
@@ -77,12 +89,12 @@ public:
     if(!_running) return;
     
     int32_t dt = LT_current_time_us - _last_command_start_time;
-
     if(_current.duration <= dt) {
       // run interrupt if necessary
       if(_interrupted > 0) {
         if(_interrupts[_interrupted-1].next() != nullptr) {
           // continue with the interrupt process
+          _last = _current;
           _current = *_interrupts[_interrupted-1].next();
           updateCommand();
           _last_command_start_time = LT_current_time_us;
@@ -90,6 +102,7 @@ public:
         else {
           // the interrupt is done. resume the buffered process
           _interrupted = 0;
+          _last = _current;
           _current = _waiting;
           updateCommand();
           _last_command_start_time += (LT_current_time_us - _interrupt_start_time);
@@ -97,7 +110,10 @@ public:
         }
       }
       else {
-        if(_buffer.takeBack(&_current) == 0) {
+        CommandData next;
+        if(_buffer.takeBack(&next) == 0) {
+          _last = _current;
+          _current = next;
           updateCommand();
           _last_command_start_time = LT_current_time_us;
           /*
@@ -130,10 +146,18 @@ public:
   }
 
   const CommandData* currentCommand() const {return &_current;}
+  const CommandData* previousCommand() const {return &_last;}
+
+  const uint8_t peek(uint8_t index, CommandData* c) const {
+    return _buffer.get(index, c);
+  }
 
   inline void updateCommand() {
-    if(_process_changed_callback != nullptr) {
-        (_process_changed_callback)(_current.code);
+    if(_command_started_callback != nullptr) {
+        (_command_started_callback)(_current.code);
+    }
+    if(_command_ended_callback != nullptr) {
+        (_command_ended_callback)(_interrupted);
     }
   }
 
@@ -141,20 +165,56 @@ public:
     _last_command_start_time + _current.duration - LT_current_time_us;
   }
 
-  void setProcessChangedCallback( intCallback f ) {
-      _process_changed_callback = f;
+  void setCommandStartedCallback( intCallback f ) {
+      _command_started_callback = f;
+  }
+
+  void setCommandEndedCallback( intCallback f ) {
+      _command_ended_callback = f;
   }
 
   void setProcessEndedCallback( intCallback f ) {
       _process_ended_callback = f;
   }
 
-  uint8_t available() const {
-    return ( _buffer.size() - _buffer.count() );
+  /*!
+  * @brief 
+  * @param q the queue to access. q == 0 is the main buffer. 
+  * q == 1 : INTERRUPT_COUNT is an interrupt vector
+  * if q > INTERRUPT_COUNT, returns 0
+  * @return the number of spaces available in the queue
+  * 
+  */
+  uint8_t available(const uint8_t q) const {
+    if(q == 0) {
+      return ( _buffer.size() - _buffer.count() );
+    }
+    else if (q <= INTERRUPT_COUNT) {
+      return ( INTERRUPT_LENGTH - _interrupts[q-1].count() );
+    }
+    else {
+      return 0;
+    }
   }
 
-  uint8_t capacity() const {
-    return _buffer.size();
+  /*!
+  * @brief 
+  * @param q the queue to access. q == 0 is the main buffer. 
+  * q == 1 : INTERRUPT_COUNT is an interrupt vector
+  * if q > INTERRUPT_COUNT, returns 0
+  * @return the capacity of the queue
+  * 
+  */
+  uint8_t capacity(const uint8_t q) const {
+    if(q == 0) {
+      return _buffer.size();
+    }
+    else if(q <= INTERRUPT_COUNT) {
+      return INTERRUPT_LENGTH;
+    }
+    else {
+      return 0;
+    }
   }
 
   bool queueCommand(const uint8_t q, const CommandData data) {
@@ -170,13 +230,21 @@ public:
     }
   }
 
+  /*!
+  * @brief start an interrupt
+  * @param v the vector to start. 0 < v <= INTERRUPT_COUNT
+  * @return true if the interrupt was successfully started
+  */
   bool triggerInterrupt(const uint8_t v) {
+    // 0 is the ring buffer
+    if(v == 0) return false;
+    // v == 1:INTERRUPT_COUNT
     if(v <= INTERRUPT_COUNT) {
-      if(_interrupts[v-1].next) {
+      if( _interrupts[v-1].next() ) {
         _interrupt_start_time = LT_current_time_us;
         _interrupted = v;
         _waiting = _current;
-        &_current = _interrupts[v-1].next();
+        _current = *_interrupts[v-1].next();
         _last_command_start_time = LT_current_time_us;
         return true;
       }
@@ -187,8 +255,6 @@ public:
   void setRunning(const bool isRunning) {
     if(isRunning) {
       _last_command_start_time += (LT_current_time_us - _pause_time);
-      /*Serial.print("START_TIME:");
-      Serial.println(_last_command_start_time);*/
       DPRINTF("Protocol started. Time elapsed");
       DPRINTLN(LT_current_time_us - _last_command_start_time);
     }
@@ -201,7 +267,17 @@ public:
   const bool isRunning() const {return _running;}
 
   void reset() {
-    memset (this, 0, sizeof (*this));
+    _buffer.reset();
+    for(uint8_t i = 0; i<INTERRUPT_COUNT; ++i) {
+      _interrupts[i].reset();
+    }
+    _running = false; 
+    _interrupted = 0; 
+    _pause_time = 0; 
+    _last_command_start_time = 0; 
+    _interrupt_start_time = 0;
+    _current = CommandData();
+    _last = CommandData();
   }
 };
 

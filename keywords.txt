@@ -82,7 +82,9 @@ User_function	LITERAL1
 #######################################
 
 ProcessManager	KEYWORD1
-setProcessChangedCallback	KEYWORD2
+setCommandStartedCallback	KEYWORD2
+setCommandEndedCallback	KEYWORD2
+setProcessEndedCallback	KEYWORD2
 setProcessErrorCallback	KEYWORD2
 
 #######################################
