@@ -30,7 +30,7 @@ DeviceManager<N_DEVICES> device_manager;
 LT_Stepper m1(device_manager.registerDevice(), 2, 5); // uid = 0
 LT_Stepper m2(device_manager.registerDevice(), 3, 6); // uid = 1
 LT_Stepper m3(device_manager.registerDevice(), 4, 7); // uid = 2
-LT_Stepper m4(device_manager.registerDevice(), 7, 13); // uid = 3
+LT_Stepper m4(device_manager.registerDevice(), 12, 13); // uid = 3
 
 void setup() {
   // open the serial port 
@@ -41,7 +41,7 @@ void setup() {
 
   // set the callback functions that implement commands
   handler.attachFunction(LT::Read_Name, onGetControllerName);
-  handler.attachFunction(LT::Read_Name, onGetControllerFirmwareVersion);
+  handler.attachFunction(LT::Read_Version, onGetControllerFirmwareVersion);
   handler.attachFunction(LT::Read_Device_Count, onGetDeviceCount);
   handler.attachFunction(LT::Write_Speed, onSetMotorSpeed);
   handler.attachFunction(LT::Read_Speed, onGetMotorSpeed);
@@ -63,6 +63,11 @@ void setup() {
   // enable motors
   pinMode(8, OUTPUT);
   digitalWrite(8, LOW);
+
+  // end stops
+  pinMode(9, INPUT_PULLUP);
+  pinMode(10, INPUT_PULLUP);
+  pinMode(11, INPUT_PULLUP);
 }
 
 void loop() {
@@ -76,17 +81,20 @@ void onMessageReceived(int msg_id) {
 
 void onGetControllerName() {
   Serial << SOM << LT::Read_Name
-         << SEP << controllerName << EOM;
+         << SEP << controllerName 
+         << EOM << endl;
 }
 
 void onGetControllerFirmwareVersion() {
-  Serial << SOM << LT::Read_Name
-         << SEP << LT_VERSION << EOM;
+  Serial << SOM << LT::Read_Version
+         << SEP << LT_VERSION
+         << EOM << endl;
 }
 
 void onGetDeviceCount() {
   Serial << SOM << LT::Read_Device_Count
-         << SEP << device_manager.deviceCount() << EOM;
+         << SEP << device_manager.deviceCount()
+         << EOM << endl;
 }
 
 void onSetMotorSpeed() {
@@ -96,10 +104,14 @@ void onSetMotorSpeed() {
     if (d->type() == LT::Stepper) {
       LT_Stepper *stepper = d->instance();
       stepper->setSpeed(rpm);
+      Serial << SOM << LT::Write_Speed
+             << SEP << stepper->UDID()
+             << SEP << stepper->getSpeed() 
+             << EOM << endl;
       return;
     }
   }
-  printError((uint8_t)LT::Write_Speed);
+  printError(LT::Write_Speed);
 }
 void onGetMotorSpeed() {
   int id = messenger.getNextArgInt();
@@ -109,11 +121,12 @@ void onGetMotorSpeed() {
       LT_Stepper *stepper = d->instance();
       Serial << SOM << LT::Read_Speed
              << SEP << stepper->UDID()
-             << SEP <<  stepper->getSpeed() << EOM;
+             << SEP <<  stepper->getSpeed()
+             << EOM << endl;
       return;
     }
   }
-  printError((uint8_t)LT::Read_Speed);
+  printError(LT::Read_Speed);
 }
 
 void onSetMotorPosition() {
@@ -124,10 +137,14 @@ void onSetMotorPosition() {
     if (d->type() == LT::Stepper) {
       LT_Stepper *stepper = d->instance();
       stepper->rotate(steps, rpm);
+      Serial << SOM << LT::Write_Position
+             << SEP << stepper->UDID()
+             << SEP << stepper->getPosition()
+             << SEP << stepper->distanceToGo() << EOM;
       return;
     }
   }
-  printError((uint8_t)LT::Write_Position);
+  printError(LT::Write_Position);
 }
 
 void onGetMotorPosition() {
@@ -142,7 +159,7 @@ void onGetMotorPosition() {
       return;
     }
   }
-  printError((uint8_t)LT::Read_Position);
+  printError(LT::Read_Position);
 }
 
 
@@ -160,6 +177,6 @@ void onUnknownCommand() {
   Serial << endl;
 }
 
-void printError(const char *msg) {
-  Serial << "Error: "<<msg;
+void printError(const uint8_t err) {
+  Serial << "Error: " << err << endl;
 }

@@ -69,6 +69,7 @@ class ASCIISerial {
     void resetMessage() {
       _msg_idx = 0;
       _pending_msg = false;
+      memset(_message, 0, sizeof(_message));
     }
 
   public:

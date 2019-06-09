@@ -20,7 +20,7 @@
 
 //macro to allow debugging via Serial1 to be switched on or off
 //comment out DEBUG_PRINT to turn off
-#define DEBUG_PRINT
+//#define DEBUG_PRINT
 #ifdef DEBUG_PRINT
   #define DPRINTLN(a) (Serial1.println(a))
   #define DPRINT(a) (Serial1.print(a))

@@ -153,10 +153,21 @@ class LT_Stepper : public LT_Device {
           _running = true;
         }
     }
-    
+    /**************************************************************************/
+    /*!
+    @brief Read the current speed of the motor
+    @return If the motor is running, returns the current speed in RPM. 
+    If the motor is not running, returns 0 RPM
+    */
+    /**************************************************************************/
     float getSpeed() {
-      float rpm = 60000000.0 / ( (float)(_resolution) * _interval);
-      return rpm;
+      if(_running) {
+        float rpm = 60000000.0 / ( (float)(_resolution) * _interval);
+        return rpm;
+      }
+      else {
+        return 0.0;
+      }
     }
     
     // read the motor speed and avoid float calculation
