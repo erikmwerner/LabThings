@@ -28,9 +28,11 @@ class MenuScreen : public GraphicsItem{
     MenuScreen* _parent = nullptr;
     const char* _title = NULL;
     const __FlashStringHelper* _flash_title = NULL;
-    Callback _screen_entered_callback = nullptr;
+    //Callback _screen_entered_callback = nullptr;
+    func_ptr _screen_entered_callback = nullptr;
     
   public:
+  MenuScreen() : GraphicsItem(nullptr, 0, 0, 0, 0) {}
     MenuScreen(MenuScreen* parent, UiContext* context, const char* title)
       : GraphicsItem(nullptr, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
        _parent(parent), _title(title) {
@@ -55,17 +57,13 @@ class MenuScreen : public GraphicsItem{
       GraphicsItem::setDirty(dirty);
     }
 
-    void setScreenEnteredCallback(Callback c) {
+    void setScreenEnteredCallback(func_ptr c) {
       _screen_entered_callback = c;
     }
     
     virtual MenuScreen* enter() { 
-      //if( _parent != NULL) {
-      //  _parent->setDirty(true);
-     // }
-
       if(_screen_entered_callback != nullptr) {
-        (*_screen_entered_callback)();
+        (*_screen_entered_callback)(nullptr);
       }
       return _parent; 
     }

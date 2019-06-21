@@ -57,6 +57,9 @@ decode_results results;
 #include <SPI.h>
 #include <mcp4261.h>
 
+#include "fix_fft.h"
+char im[128], data[128];
+
 MCP4261 volumePot = MCP4261(7);
 MCP4261 bassPot = MCP4261(6);
 
@@ -193,6 +196,7 @@ void setup() {
 
 void loop() {
   checkIR();
+  fix_fft(data, im, 7, 0);
   // update all devices as often as possible
   device_manager.update();
 }

@@ -3,7 +3,8 @@
 
 #include "ui_context.h"
 //#include "menu_bar.h"
-typedef void(*Callback) ();
+//typedef void(*Callback) ();
+typedef void(*func_ptr) (void* sender);
 
 enum TextAlign : uint8_t {
   NoAlign = 0,
@@ -293,7 +294,7 @@ class NumberItem : public GraphicsItem {
   void decrement() {
     setValue(_value - 1);
   }
-  void setValue(const T value) {
+  void setValue(const T value, const bool respond = true) {
     _value = value;
     if (_value > _max_value) {
       _value = _max_value;
@@ -301,7 +302,7 @@ class NumberItem : public GraphicsItem {
     if (_value < _min_value) {
       _value = _min_value;
     }
-    if (_value_changed_callback != nullptr) {
+    if ( _value_changed_callback != nullptr && respond ) {
       (*_value_changed_callback)();
     }
     //setSize(); // adjust width

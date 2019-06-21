@@ -134,13 +134,13 @@ public:
         }
     }
     
-    TS size() { return BUFFER_LENGTH;}
-    TS count() {return (_head - _tail);}
+    TS size() const { return BUFFER_LENGTH;}
+    TS count() const {return (_head - _tail);}
 
-    bool isFull() {
+    bool isFull() const {
         return count() == size() ? true : false;
     }
-    bool isEmpty() {
+    bool isEmpty() const {
         return count() == 0 ? true : false;
     }
 

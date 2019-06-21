@@ -37,6 +37,18 @@ class MainMenu : public MenuScreen {
       }
     }
 
+    bool removeMenu() {
+      if(_screen_count > 0) {
+        _sub_menus[_screen_count--] = nullptr;
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    uint8_t count() const {return _screen_count;}
+
     void setScrollSpeed(uint8_t scroll_speed) {
         _scroll_speed = scroll_speed;
     }
@@ -44,7 +56,7 @@ class MainMenu : public MenuScreen {
     void increment() {
       if(_scrolling) return;
       _last_value = _value;
-      _value =(_value + 1) % _screen_count;
+      _value = (_value + 1) % _screen_count;
       setDirty(true);
       updateScrollData();
     }

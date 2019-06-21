@@ -5,7 +5,7 @@
 
 //extern "C" {
 // callback functions always follow the signature: void cmd(void);
-typedef void(*func_ptr) (const void* sender);
+typedef void(*func_ptr) (void* sender);
 //};
 
 class MessageHandler {

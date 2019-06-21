@@ -8,6 +8,11 @@
 #include <U8g2lib.h>
 #include <U8x8lib.h>
 
+/*!
+* The UiContext structure maintains and access a graphical
+* output device.
+* 
+*/
 struct UiContext {
   U8G2* display = nullptr;
   const uint8_t _margin;
@@ -18,7 +23,7 @@ struct UiContext {
   
   // Note: if using transparencies (fontMode =1), use transparent fonts (u8g2_xxx_tx)
   // Note: font sets can consume vastly different amounts of
-  // memory. Use reduced size u(8g2_xxx_xr) fonts to save space.
+  // memory. Use reduced size fonts (u8g2_xxx_xr) to save memory.
   UiContext(U8G2* d, const uint8_t margin = 2, 
     const uint8_t* font_large = u8g2_font_helvB12_tr, 
     const uint8_t* font_medium = u8g2_font_helvR08_tr, 

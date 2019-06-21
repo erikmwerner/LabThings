@@ -81,7 +81,7 @@ class TextScreen : public MenuScreen {
         return parent();
       }
     }
-    void setNextPage(const MenuScreen* next_page) {
+    void setNextPage(MenuScreen* next_page) {
       _next_page = next_page;
     }
     const char *text() {

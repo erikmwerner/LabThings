@@ -54,8 +54,8 @@ class NumberScreen : public MenuScreen {
       return _number.value();
     }
     
-    void setValue(const T value) {
-     _number.setValue(value);
+    void setValue(const T value, const bool respond = true) {
+     _number.setValue(value, respond);
     }
     
     void draw(UiContext* context) {

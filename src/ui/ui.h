@@ -1,9 +1,3 @@
-/*!
-* The Ui class manages one or more MenuScreens
-* Inherits from LT_Device UDID and type.
-* The Ui is updated in the DeviceManager update function.
-* 
-*/
 
 #ifndef __UI_H__
 #define __UI_H__
@@ -15,26 +9,34 @@
 #include "menu_screen.h"
 #include "ui_context.h"
 
+/*!
+* The Ui class manages objects that constitute a graphical user 
+* interface. It implements the composite design pattern,
+* where the Ui serves as the client and can manipulate a set of
+* objects that inherit from the GraphicsItem class.
+
+* The Ui class inherits from LT_Device so it can be updated using the 
+* DeviceManager update() function. By default, type() returns LT::Ui.
+*/
 class Ui : public LT_Device {
-    UiContext _context;
-    MenuScreen* _current_screen = NULL;
-    MenuScreen* _home_screen = NULL;
+    UiContext _context; ///< pointer to the graphics context (output device) TK
+    MenuScreen* _current_screen = nullptr; ///< pointer to the current screen
+    MenuScreen* _home_screen = nullptr; ///< pointer to default screen
     
     /*
     uint8_t _fps = 0; //hold fps calculation data
     uint8_t _frames = 0;
     uint32_t _t_last_fps_update = 0;
     */
+    uint32_t _t_last_input_us = 0; ///< Keep track of the time since the last user input
 
-    // keep track of the time since the last user input
-    uint32_t _t_last_input_us = 0;
-
-    // automatically return home. Set to zero to disable
-    uint32_t _return_home_timeout_us = 0; //10000000; //10 seconds
     
-    // start a screensaver. set to zero to disable
-    uint32_t _screensaver_timeout_us = 0; // 60000000; // 1 minute
-    bool _screensaver_enabled = false; // set to false to disable screensaver and sleep display instead
+    uint32_t _return_home_timeout_us = 0; ///< Track time to automatically return home. Set to zero to disable.
+    
+    
+    uint32_t _screensaver_timeout_us = 0; ///< Track time to start a screensaver. Set to zero to disable
+    bool _screensaver_enabled = false; ///< Enable screen saver option.
+    ///< If set to false, and the screensaver is activated, the display is put to sleep instead.
     bool _screensaver_active = false;
     bool _is_sleeping = false;
     
@@ -66,7 +68,7 @@ class Ui : public LT_Device {
 
     void update() {
       // main drawing function
-      if( _current_screen != NULL ) {
+      if( _current_screen != nullptr ) {
         // only redraw if the screen has changed
         if( _current_screen->isDirty() ) {
           // uses U8G2 to split up the display
@@ -96,7 +98,7 @@ class Ui : public LT_Device {
       }
       
       // check if it is time to return to home screen
-      if ( ( _home_screen != NULL ) && ( _return_home_timeout_us > 0 ) ) {
+      if ( ( _home_screen != nullptr ) && ( _return_home_timeout_us > 0 ) ) {
         if ( _current_screen != _home_screen ) {
           if ( ( LT_current_time_us - _t_last_input_us ) >= _return_home_timeout_us ) {
             setCurrentScreen( _home_screen );
@@ -113,7 +115,7 @@ class Ui : public LT_Device {
             // toggle the screensaver flag
             _screensaver_active = ! _screensaver_active;
             // set the current screen dirty
-            if( _current_screen != NULL ) {
+            if( _current_screen != nullptr ) {
               _current_screen->setDirty(true);
             }
             // update the last input time
@@ -186,7 +188,7 @@ class Ui : public LT_Device {
       if(_is_sleeping) { 
         setSleeping(false);
       }
-      if(_current_screen != NULL) {
+      if(_current_screen != nullptr) {
         _current_screen->increment();
       }
     }
@@ -196,7 +198,7 @@ class Ui : public LT_Device {
       if(_is_sleeping) { 
         setSleeping(false);
       }
-      if(_current_screen != NULL) {
+      if(_current_screen != nullptr) {
         _current_screen->decrement();
       }
     }
@@ -206,9 +208,9 @@ class Ui : public LT_Device {
       if(_is_sleeping) { 
         setSleeping(false);
       }
-      if(_current_screen != NULL) {
+      if(_current_screen != nullptr) {
         MenuScreen* next_screen = _current_screen->enter();
-        if(next_screen != NULL) {
+        if(next_screen != nullptr) {
           setCurrentScreen(next_screen);
         }
       }

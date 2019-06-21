@@ -24,10 +24,7 @@
 
 #define MAX_MESSAGE_LENGTH 64
 
-//extern "C"{
-// callback functions always follow the signature: void cmd(void);
 typedef void(*intCallback) (int);
-//};
 
 class ASCIISerial {
     Stream* _com = nullptr;
@@ -95,12 +92,10 @@ class ASCIISerial {
     int getNextArgInt() {
       char* token = strtok(NULL, _delimiters);
       return strtol(token, NULL, 10);
-      //return atoi(token);
     }
     long getNextArgLong() {
       char* token = strtok(NULL, _delimiters);
       return strtol(token, NULL, 10);
-      //return atol(token);
     }
     unsigned long getNextArgULong() {
       char* token = strtok(NULL, _delimiters);
@@ -109,7 +104,6 @@ class ASCIISerial {
     double getNextArgDouble() {
       char* token = strtok(NULL, _delimiters);
       return strtod(token, NULL);
-      //return atof(token);
     }
     char* getNextArgChar() { 
       char* token = strtok(NULL, _delimiters);
