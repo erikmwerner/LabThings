@@ -15,12 +15,14 @@ class MessageHandler {
     func_ptr _default_function = nullptr;
   public:
 
-// overload to handle messages without a sender specified
-  void handleMessage(int index) {
+// overload to handle messages without a sender argument
+ /*  void handleMessage(int index) {
     handleMessage(nullptr, index);
-  }
+  }*/
     // route the message to
-    void handleMessage( void* sender, int index ) {
+    /*!
+     */
+    void handleMessage( int index, void* sender = nullptr ) {
       if (index >= 0 && index < MAX_FUNCTIONS) {
         if(_function_list[index] != nullptr) {
           (_function_list[index])(sender);

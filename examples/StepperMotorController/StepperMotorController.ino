@@ -1,9 +1,9 @@
 /* StepperMotorController
- * Designed for Arduino CNC Shield
- * With 4 stepper motors
- * 
- *  Copyright (c) 2019 Erik Werner erikmwerner@gmail.com
- *  All rights reserved.
+   Designed for Arduino CNC Shield
+   With 4 stepper motors
+
+    Copyright (c) 2019 Erik Werner erikmwerner@gmail.com
+    All rights reserved.
 */
 
 #include <LabThings.h>
@@ -15,7 +15,7 @@ char controllerName[] = "4-Motor Stepper";
 // multiple copies and save a little RAM
 const char SOM = '<';
 const char SEP = ',';
-const char EOM ='>';
+const char EOM = '>';
 
 // define messager and message handler
 ASCIISerial messenger(Serial, SOM, SEP, EOM);
@@ -33,7 +33,7 @@ LT_Stepper m3(device_manager.registerDevice(), 4, 7); // uid = 2
 LT_Stepper m4(device_manager.registerDevice(), 12, 13); // uid = 3
 
 void setup() {
-  // open the serial port 
+  // open the serial port
   Serial.begin(115200);
 
   // set the callback function for when a message arrives
@@ -58,7 +58,7 @@ void setup() {
   // stepper motors default to 200 steps/revoulution
   // different resolutions can be set
   // example: 200 step motor with 1/8 step microstepping = 1600 steps/revolution
-  // m1.setResolution(1600); 
+  // m1.setResolution(1600);
 
   // enable motors
   pinMode(8, OUTPUT);
@@ -81,7 +81,7 @@ void onMessageReceived(int msg_id) {
 
 void onGetControllerName() {
   Serial << SOM << LT::Read_Name
-         << SEP << controllerName 
+         << SEP << controllerName
          << EOM << endl;
 }
 
@@ -106,7 +106,7 @@ void onSetMotorSpeed() {
       stepper->setSpeed(rpm);
       Serial << SOM << LT::Write_Speed
              << SEP << stepper->UDID()
-             << SEP << stepper->getSpeed() 
+             << SEP << stepper->getSpeed()
              << EOM << endl;
       return;
     }
@@ -140,7 +140,8 @@ void onSetMotorPosition() {
       Serial << SOM << LT::Write_Position
              << SEP << stepper->UDID()
              << SEP << stepper->getPosition()
-             << SEP << stepper->distanceToGo() << EOM;
+             << SEP << stepper->distanceToGo() 
+             << EOM << endl;
       return;
     }
   }
@@ -155,28 +156,30 @@ void onGetMotorPosition() {
       Serial << SOM << LT::Read_Position
              << SEP << stepper->UDID()
              << SEP << stepper->getPosition()
-             << SEP << stepper->distanceToGo() << EOM;
+             << SEP << stepper->distanceToGo() 
+             << EOM << endl;
       return;
     }
   }
   printError(LT::Read_Position);
 }
 
-
 void onUnknownCommand() {
-  Serial << endl << "Lab Things v " << LT_VERSION
-         << endl << controllerName
+  Serial << endl << "Lab Things v" << LT_VERSION
+         << endl << "Name: " << controllerName << endl;
+  uint8_t device_count = device_manager.deviceCount();
+  Serial << "Device count: " << device_count
          << endl << F("Available command IDs: ") << endl;
-  uint8_t count = handler.getAttachedFunctionCount();
-  uint8_t function_list[count] = {0};
+  uint8_t function_count = handler.getAttachedFunctionCount();
+  uint8_t function_list[function_count] = {0};
   handler.getAttachedFunctions(function_list);
-  for (uint8_t i = 0; i < sizeof(function_list); ++i) {
+  for (uint8_t i = 0; i < function_count; ++i) {
     Serial << (function_list[i]);
     Serial << SEP;
   }
-  Serial << endl;
+  Serial << endl << "Command syntax: " << SOM << "command ID" << SEP << "command args" << SEP << "..." << EOM << endl;
 }
 
 void printError(const uint8_t err) {
-  Serial << "Error: " << err << endl;
+  Serial << "Error. Type: " << err << endl;
 }

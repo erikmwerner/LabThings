@@ -14,7 +14,7 @@
 
 #include "../utilities/crc.h"
 
-#define MAX_MESSAGE_LENGTH 64
+#define MAX_MESSAGE_LENGTH 64 //< size of the incoming message buffer. Must be smaller than 256 [sizeof(uint8_t)]
 
 typedef void (*intCallback)(int);
 

@@ -54,23 +54,23 @@ General | Read Device Type | `Read_Device_Type` | `5` |`0x05`	|
 General | Read System Status | `Read_Status` | `6` | `0x06` |
 General | Acknowledge | `Acknowledge` | `7` | `0x07` |
 General | Error | `Error` | `8` | `0x08` |
-GPIO |Write Digital Output |`Write_Digital_Output` |`9` |`0x09` |Set the data on a digital output pin or port
-GPIO |Read Digital Output |`Read_Digital_Output` |`10` |`0x0A` |Read the current state of a digital output pin or port
-GPIO |Read Digital Input |`Read_Digital_Input` |`11` |`0x0B` |Read the value of a digital input pin
-GPIO |Write PWM |`Write_PWM` |`12` |`0x0C` |Set the value of an analog output
-GPIO |Read PWM |`Read_PWM` |`13` |`0x0D` |Read the current state of an analog output
-GPIO |Read ADC |`Read_ADC` |`14` |`0x0E` |Read a value from an analog input
-GPIO |Write Sensor Setting |`Write_Sensor_Setting` |`15` |`0x0F` |Write a setting to a sensor. Common examples include: if polling is enabled, the polling interval, sensor resolution
-GPIO |Read Sensor Setting |`Read_Sensor_Setting` |`16` |`0x10` |Read a sensor setting
-GPIO |Read Sensor Value |`Read_Sensor_Value` |`17` |`0x11` |Read a value from a sensor
-Motors |Write Speed |`Write_Speed` |`18` |`0x12` |Set the speed of a motor
-Motors |Read Speed |`Read_Speed` |`19` |`0x13` |Read the speed of a motor
-Motors |Write Position |`Write_Position` |`20` |`0x14` |Set the position of a motor
-Motors |Read Position |`Read_Position` |`21` |`0x15` |Read the position of a motor
+Device |Write Digital Output |`Write_Digital_Output` |`9` |`0x09` |Set the data on a digital output pin or port
+Device |Read Digital Output |`Read_Digital_Output` |`10` |`0x0A` |Read the current state of a digital output pin or port
+Device |Read Digital Input |`Read_Digital_Input` |`11` |`0x0B` |Read the value of a digital input pin
+Device |Write PWM |`Write_PWM` |`12` |`0x0C` |Set the value of an analog output
+Device |Read PWM |`Read_PWM` |`13` |`0x0D` |Read the current state of an analog output
+Device |Read ADC |`Read_ADC` |`14` |`0x0E` |Read a value from an analog input
+Device |Write Sensor Setting |`Write_Sensor_Setting` |`15` |`0x0F` |Write a setting to a sensor. Common examples include: if polling is enabled, the polling interval, sensor resolution
+Device |Read Sensor Setting |`Read_Sensor_Setting` |`16` |`0x10` |Read a sensor setting
+Device |Read Sensor Value |`Read_Sensor_Value` |`17` |`0x11` |Read a value from a sensor
+Device |Write Speed |`Write_Speed` |`18` |`0x12` |Set the speed of a motor
+Device |Read Speed |`Read_Speed` |`19` |`0x13` |Read the speed of a motor
+Device |Write Position |`Write_Position` |`20` |`0x14` |Set the position of a motor
+Device |Read Position |`Read_Position` |`21` |`0x15` |Read the position of a motor
 Motors |Write Setting |`Write_Setting` |`22` |`0x16` |Write a setting of a motor
 Motors |Read Setting |`Read_Setting` |`23` |`0x17` |Read a setting of a motor
-Reserved |Reserved | |`24` |`0x18` |
-Reserved |Reserved | |`25` |`0x19` |
+EEPROM |Read EEPROM | `Read_EEPROM` |`24` |`0x18` |Read from EEPROM
+EEPROM |Write EEPROM | `Write_EEPROM` |`25` |`0x19` |Write to EEPROM
 Reserved |Reserved | |`26` |`0x1A` |
 Processes |Go To |`Go_To` |`27` |`0x1B` |Add a function to the queue
 Processes |Enqueue |`Enqueue` |`28` |`0x1C` |Add a function to the queue
