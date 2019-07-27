@@ -36,15 +36,22 @@ struct CommandData{
   {}
 };
 
+/*! a simple class to hold a small sequence of 
+commands to be used once as an interrupt
+ */
 template <uint8_t LENGTH>
 class ProcessVector {
   uint8_t _count = 0;
   uint8_t _next = 0;
   CommandData _v[LENGTH];
 public: 
+  // zero the memory of this object 
   void reset(){
     memset (this, 0, sizeof (*this));
   }
+  // add a command to the buffer. The count
+  // variable is incremented to indicate the buffer
+  // has another command
   bool put(const CommandData data) {
     if(_count < LENGTH) {
       _v[_count++] = data;
@@ -54,6 +61,8 @@ public:
       return false;
     }
   }
+  // if successful, reads the command at the next index
+  // into data and increments the next index
   int8_t next(CommandData* data) {
     if(_next < _count) {
       *data = _v[_next++];
@@ -76,10 +85,11 @@ class ProcessManager {
   CommandData _last;
   CommandData _waiting;
   bool _running = false; ///< flag to track if the protocol is currrently running
-  uint8_t _interrupted = 0; ///< flag to track if the protocol is interrupted. 0 is false. > 0 is the (vector - 1)
+  uint8_t _vector = 0; ///< flag to track if the protocol is interrupted. 0 is false. > 0 is the (vector - 1)
+  uint8_t _last_vector = 0;
   uint32_t _pause_time = 0; ///< the system time in microseconds that the protocol was paused
   uint32_t _last_command_start_time = 0; ///< the system time in microseconds that the last command was started
-  uint32_t _interrupt_start_time = 0;
+  uint32_t _last_elapsed = 0;
 
   intCallback _command_started_callback = nullptr;
   intCallback _command_ended_callback = nullptr;
@@ -94,7 +104,7 @@ public:
 
     // if more time has elapsed than the current command duration
     if(dt >= _current.duration) {
-      if(_interrupted > 0) { // run interrupt if necessary
+      if(_vector > 0) { // run interrupt if necessary
         runInterrupt();
       }
       else { // running sequential command vector
@@ -102,8 +112,8 @@ public:
         if( _buffer.takeBack(&next_cmd) == 0 ) {
           _last = _current;
           _current = next_cmd;
-          updateCommand();
           _last_command_start_time = LT_current_time_us;
+          updateCommand();
           /*
          // uint32_t t_r = _current._duration - dt;
           uint32_t t_r = LT_current_time_us - (_last_command_start_time + _current._duration);
@@ -122,6 +132,10 @@ public:
         else {
           // there are no more commands in the buffer. stop the protocol
           _running = false;
+          _last = _current;
+          if(_command_ended_callback != nullptr) {
+            (_command_ended_callback)(_vector);
+          }
           if(_process_ended_callback != nullptr) {
             (_process_ended_callback)(0);
           }
@@ -147,12 +161,16 @@ public:
         (_command_started_callback)(_current.code);
     }
     if(_command_ended_callback != nullptr) {
-        (_command_ended_callback)(_interrupted);
+        (_command_ended_callback)(_last_vector);
     }
   }
 
-  uint32_t remainingTime() {
-    _last_command_start_time + _current.duration - LT_current_time_us;
+  uint32_t remainingTime() const {
+    return (_last_command_start_time + _current.duration - LT_current_time_us);
+  }
+
+  uint32_t currentCommandElapsedTime() const {
+    return (LT_current_time_us - _last_command_start_time);
   }
 
   void setCommandStartedCallback( intCallback f ) {
@@ -169,7 +187,7 @@ public:
 
 /*!
  */
-  uint8_t vector() const { return _interrupted; }
+  uint8_t vector() const { return _vector; }
 
   /*!
   * @brief 
@@ -217,6 +235,8 @@ public:
       return (_buffer.put(data) == 0 ? true : false);
     }
     else if(q <= INTERRUPT_COUNT) {
+      //Serial.print("attempting to enqueue to: ");
+      //Serial.println(q);
       return _interrupts[q-1].put(data);
     }
     else {
@@ -225,31 +245,44 @@ public:
   }
 
   /*!
-  * @brief start an interrupt
+  * @brief start an interrupt. If v is a valid interrupt vector, 
+  * the current command and the current time are saved
+  * and the interrupt vector is run
   * @param v the vector to start. 0 < v <= INTERRUPT_COUNT
   * @return true if the interrupt was successfully started
   */
   bool triggerInterrupt(const uint8_t v) {
     // 0 is the ring buffer
     if(v == 0) return false;
-    // v == 1:INTERRUPT_COUNT
+    // 0 < v <= INTERRUPT_COUNT
     if(v <= INTERRUPT_COUNT) {
-      _interrupt_start_time = LT_current_time_us;
-      _interrupted = v;
-      _waiting = _current;
-      runInterrupt();
+       CommandData next_cmd; 
+      if( _interrupts[v-1].next(&next_cmd) == 0 ) {
+        _last_elapsed = currentCommandElapsedTime();
+        _waiting = _current;
+        _last = _current;
+        _current = next_cmd;
+        _last_command_start_time = LT_current_time_us;
+        _last_vector = _vector;
+        _vector = v;
+        updateCommand();
+      }
       return true;
     }
     return false;
   }
 
+  /*!
+  * @brief attempts to run the next command in the current
+  * interrupt vector.
+   */
   void runInterrupt() {
     CommandData next_cmd; 
-    if( _interrupts[_interrupted-1].next(&next_cmd) == 0 ) {
-      _last = _current;
+    if( _interrupts[_vector-1].next(&next_cmd) == 0 ) {
+      _last = _current; // the previous command has been saved in last and waiting 
       _current = next_cmd;
-      updateCommand();
       _last_command_start_time = LT_current_time_us;
+      updateCommand();
     }
     else {
       // the interrupt is done. resume the buffered process
@@ -257,13 +290,19 @@ public:
     }
   }
 
+  /*!
+  * @brief cleans up after an interrupt vector has finished
+  * (has no more commands).
+   */
   void finishInterrupt() {
-    _interrupts[_interrupted-1].reset();
-    _interrupted = 0;
+    _interrupts[_vector-1].reset();
     _last = _current;
     _current = _waiting;
+    _last_command_start_time = (LT_current_time_us - _last_elapsed);
+    uint8_t temp = _vector;
+    _vector = _last_vector;
+    _last_vector = temp;
     updateCommand();
-    _last_command_start_time += (LT_current_time_us - _interrupt_start_time);
   }
 
   void setRunning(const bool isRunning) {
@@ -286,10 +325,11 @@ public:
       _interrupts[i].reset();
     }
     _running = false; 
-    _interrupted = 0; 
+    _vector = 0; 
+    _last_vector = 0;
     _pause_time = 0; 
-    _last_command_start_time = 0; 
-    _interrupt_start_time = 0;
+    _last_command_start_time = 0;
+    _last_elapsed = 0;
     _current = CommandData();
     _last = CommandData();
   }
