@@ -8,13 +8,17 @@ class DeviceManager {
     int8_t n_devices = 0; ///< count of attached devices
     LT_Device* _dev[MAX_DEVICES] = {nullptr}; ///< pointers to all attached devices
 
+    /*!
+     * @brief SystemStats keeps track of loop time metrics to help estimate what kind of real-time deadlines
+     * the system is capable of meeting.
+     */
     struct SystemStats {
-      uint8_t loop_count;
-      uint32_t accumulator;
-      uint32_t max_loop_time;
-      uint32_t avg_loop_time;
-      uint32_t uptime_low;
-      uint32_t uptime_high;
+      uint8_t loop_count; ///< track the number of loops since the average loop time was computed
+      uint32_t accumulator; ///< tracks the sum of the each loop length until the loop_count rollsover
+      uint32_t max_loop_time; ///< track the longest loop time recorded in microseconds
+      uint32_t avg_loop_time; ///< track the average loop time in microseconds
+      uint32_t uptime_low; ///< the least significant 4 bytes of a 64-bit microsecond counter
+      uint32_t uptime_high; ///< the most significant 4 bytes of a 64-bit microsecond counter
       SystemStats() : loop_count(0), accumulator(0), max_loop_time(0),
       avg_loop_time(0), uptime_low(0), uptime_high(0) {} 
       void update(const uint32_t now) 
@@ -31,16 +35,12 @@ class DeviceManager {
           uptime_high++;
         }
         uptime_low = LT_current_time_us;
-        // update average loop time
+        // update average loop time accumulator
         accumulator += dt;
         if(loop_count == 0) { // rolls over at 256 updates
           avg_loop_time = accumulator >> 8; // divide by 256
           accumulator = 0;
           loop_count = 0;
-          //Serial.print("max: ");
-          //Serial.print(max_loop_time);
-          //Serial.print(" avg: ");
-          //Serial.println(avg_loop_time);
         }
       }
     };
@@ -56,20 +56,26 @@ class DeviceManager {
     */
     /**************************************************************************/
     void update() {
-    
-      //static int updateCounter = 0;
-      //static uint32_t update_time_start = 0;
       
       // update global external time variable
       LT_current_time_us = micros();
       
+      // iterate through devices and update
+      // do while loop format from AVR optimization documents
       uint8_t i = n_devices;
-      do {
+      // do not loop if nothing is attached
+      if(i == 0) {
+        return;
+      }
+      else {
+        do {
         if( _dev[i - 1] != nullptr ) {
           _dev[i - 1]->update();
          }
-      } while( --i ); // stops update() when i==0
-
+        } while( --i ); // stops update() when i==0
+      }
+     
+     // update the statistics with the micros() value after devices are updated
       _system_stats.update(micros());
     }
     
@@ -137,6 +143,12 @@ class DeviceManager {
       }
     }
 
+    /*!
+     * @brief Get the Status object. This object contains information on the average
+     * and maximum loop times as well as the total uptime of the system
+     * 
+     * @return SystemStats 
+     */
     SystemStats getStatus() const {return _system_stats;}
 };
 

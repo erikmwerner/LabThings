@@ -133,6 +133,9 @@ public:
           // there are no more commands in the buffer. stop the protocol
           _running = false;
           _last = _current;
+          // sets the current command to an invalid command
+          // the command code is oob to the handler
+          _current = CommandData(); 
           if(_command_ended_callback != nullptr) {
             (_command_ended_callback)(_vector);
           }

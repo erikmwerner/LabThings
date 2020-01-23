@@ -5,9 +5,11 @@ const uint8_t MAX_MESSAGE_LENGTH = 64; //< size of the incoming message buffer. 
 
 typedef void(*intCallback) (int);
 
-/*!Lab Things ASCII Serial Protocol
+/*! Lab Things ASCII Serial Protocol
 * @file ascii_serial.h
 * Transmit data in a simple and human-readable from.
+*
+* @sa BinarySerial
 *
 * Messages are sent in ASCII form between start and end characters.
 * When a start character is received, all previous message data is discarded.
@@ -43,7 +45,9 @@ class ASCIISerial {
     intCallback _tx_callback = nullptr; //< function to call when a message has been sent
     
     /*!
-    
+     * @brief 
+     * 
+     * @param data 
      */
     void handleByte(char data) {
       if ( (char)data == _delimiters[0] ) {
@@ -75,6 +79,8 @@ class ASCIISerial {
       }
     }
     /*!
+     * @brief 
+     * 
      */
     void resetMessage() {
       _msg_idx = 0;
@@ -84,21 +90,35 @@ class ASCIISerial {
 
   public:
     /*!
+     * @brief Construct a new ASCIISerial object
+     * 
+     * @param s 
+     * @param som 
+     * @param sep 
+     * @param eom 
      */
     ASCIISerial(Stream &s, const char som = '<', const char sep = ',', const char eom = '>')
     :_com(&s), _delimiters( {som, sep, eom, 0} ) {}
 
     /*!
+     * @brief Set the Message Received Callback object
+     * 
+     * @param c 
      */
     void setMessageReceivedCallback(intCallback c) {
       _rx_callback = c;
     }
     /*!
+     * @brief Set the Message Sent Callback object
+     * 
+     * @param c 
      */
     void setMessageSentCallback(intCallback c) {
       _tx_callback = c;
     }
     /*!
+     * @brief 
+     * 
      */
     void update() {
       // check for new data
@@ -107,11 +127,18 @@ class ASCIISerial {
       }
     }
     /*!
+     * @brief 
+     * 
+     * @return true 
+     * @return false 
      */
     bool hasPendingMessage() {
       return _pending_msg;
     }
     /*!
+     * @brief Get the Next Arg Int object
+     * 
+     * @return int 
      */
     int getNextArgInt() {
       char* token = strtok(NULL, _delimiters);

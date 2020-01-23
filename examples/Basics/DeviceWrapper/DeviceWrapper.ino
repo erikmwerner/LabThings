@@ -1,11 +1,12 @@
 /* 
- The SensorWrapper example demonstrates how to define
- a class that inherits from LT_Sensor and another library.
+ The DeviceWrapper example demonstrates how to define
+ a class that inherits from LT_Device and another library.
 
  This allows code from other libraries to be used with 
- the Lab Things callback, messenger, and multitasking system.
+ the Lab Things  messenger and multitasking system.
 
- See Also: The DeviceWrapper example
+ To inherit additional functions, like the option to poll a sensor 
+ or use pre-definied callbacks, see the SensorWrapper example.
 
   Copyright (c) 2018 Erik Werner erikmwerner@gmail.com
   All rights reserved.
@@ -41,33 +42,33 @@
 DeviceManager<1> device_manager;
 
 /**************** Wrapper Class ****************/
-/* Define a class that inherits from the sensor's library and from LT_Sensor 
- * Using LT_Sensor instead of LT_Device adds polling and data callback features 
-*/
-class LT_SPISensor : public TruStabilityPressureSensor, public LT_Sensor {
+/* Define a class that inherits from the sensor's library and from LT_Device */
+class LT_SPISensor : public TruStabilityPressureSensor, public LT_Device {
 
   public:
-    // The constructor calls the sensor library constructor
+    // the constructor
     LT_SPISensor(const int id, uint8_t ss_pin, float p_min, float p_max)  :
-    TruStabilityPressureSensor(ss_pin, p_min, p_max), LT_Sensor(id) {}
+    TruStabilityPressureSensor(ss_pin, p_min, p_max), LT_Device(id) {}
 
-    // Subclasses of LT_Device must implement type()
+    // subclasses of LT_Device must implement type()
     LT::DeviceType type() const { return (LT::DeviceType)(LT::UserType + 1); }
 
-    // begin() implements library-specific initialization 
+    // implement library-specific functions in begin, update, or other added functions
     void begin() {
       TruStabilityPressureSensor::begin();
     }
 
-    // override readSensor() to let the Lab Things device manager poll the sensor
-    uint8_t readSensor() {
+    void update() {
       // TruStabilityPressureSensor::readSensor() returns 0 when new data is available
-      // when readSensor() returns 0 to the base class, the new data callback is executed
-      return TruStabilityPressureSensor::readSensor();
+      if( TruStabilityPressureSensor::readSensor() == 0 ) {
+        Serial.print("temp: ");
+        Serial.print(TruStabilityPressureSensor::temperature());
+        Serial.print(" pressure: ");
+        Serial.println(TruStabilityPressureSensor::pressure());
+      }
     }
     
 };
-
 /**************** /Wrapper Class ****************/
 
 // Once the pressure sensor logic has been defined, the remaining code is short
@@ -75,26 +76,10 @@ LT_SPISensor pressure_sensor(device_manager.registerDevice(), SS, -15.0, 15.0);
 
 void setup() {
   Serial.begin(115200);
+  SPI.begin();
   device_manager.attachDevice(&pressure_sensor);
-  
-  // inheriting from LT_Sensor allows 
-  // polling and callback features to be re-used
-  // from the Lab Things library
-  pressure_sensor.setPolling(true);
-  pressure_sensor.setPollingInterval(500000);
-  pressure_sensor.setNewDataCallback(onNewSensorData);
 }
 
 void loop() {
   device_manager.update();
-}
-
-// callback function executes when new data is read
-void onNewSensorData() {
-  Serial.print("temp: ");
-  Serial.print(pressure_sensor.temperature());
-  Serial.print(" pressure: ");
-  Serial.print(pressure_sensor.pressure());
-  Serial.print(" sample time: ");
-  Serial.println(pressure_sensor.lastSampleTime());
 }

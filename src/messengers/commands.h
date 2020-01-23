@@ -1,7 +1,11 @@
 #ifndef __COMMANDS_H__
 #define __COMMANDS_H__
 
-#define MAX_FUNCTIONS 64 // TK why?
+//< This sets the size of the callback array in the MessageHandler class
+//< The default value of 64 leaves room for up to 22 user-defined function
+//< codes, but the maxiumum can be increased to 256 (214 user codes)
+//< if needed and memory is not an issue (0 to 255 in an unsigned 8 bit int)
+#define MAX_FUNCTIONS 64
 
 namespace LT {
   enum FN_CODE : uint8_t {

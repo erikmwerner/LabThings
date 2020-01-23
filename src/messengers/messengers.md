@@ -9,20 +9,20 @@ Write HIGH to a digital output on port 5:
 `<9,5,1>`
 
 Set motor with ID = 3 to -101.5 RPM:
-`<20,3,-101.5>`
+`<18,3,-101.5>`
 
-The first data field contains the command to be executed. Data in subsequent fields depends on the command implementation, and can be accessed using the functions
-getNextArgInt()
-getNextArgLong()
-getNextArgULong()
-getNextArgDouble()
-getNextArgChar()
+The first data field contains the command to be executed. Data in subsequent fields depends on the command implementation, and can be accessed using the functions:
+* getNextArgInt()
+* getNextArgLong()
+* getNextArgULong()
+* getNextArgDouble()
+* getNextArgChar()
 
-Well behaved implementations should always respond to commands either with an acknowledgement or an error. Data from the slave to the master should follow a similar delimiting format, but is implementation dependent.
+Well-behaved implementations should always respond to commands either with an acknowledgement or an error. Data from the slave to the master should follow a similar delimiting format, but is implementation dependent.
 
 Binary Serial
 ------------
-Data packets are sent between the master and the slave using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. Bytes are sent in order of least significant to most significant (little-endian). Messages always begin and end with END markers. The standard SLIP frame markers are used:
+Messages are sent between the master and the slave in data packets using Serial Line IP (SLIP) packet framing (RFC 1055) with a 32-bit checksum. Bytes are sent in order of least significant to most significant (little-endian). Messages always begin and end with END markers. The standard SLIP frame markers are used:
 
 Hex |	Decimal |	Type Definition	 | Desctiption
 ----|---------|------------------|------------
