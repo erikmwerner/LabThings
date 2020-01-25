@@ -35,8 +35,8 @@
 #endif
 
 uint32_t LT_current_time_us;
-const static float LT_VERSION = 0.18;
-#define LT_VERSION_STRING "0.18"
+const static float LT_VERSION = 0.19;
+#define LT_VERSION_STRING "0.19"
 
 #include "devices/device.h"
 #include "devices/sensor.h"

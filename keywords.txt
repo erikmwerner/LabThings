@@ -155,6 +155,14 @@ LT_StateSaver	KEYWORD1
 Ui	KEYWORD1
 
 UiContext	KEYWORD1
+levelWear	KEYWORD2
+setCurrentFont	KEYWORD2
+getFontLarge	KEYWORD2
+getFontMedium	KEYWORD2
+getFontSmall	KEYWORD2
+getFontSymbol	KEYWORD2
+getMargin	KEYWORD2
+
 
 MainMenu	KEYWORD1
 setCurrentScreen	KEYWORD2
@@ -168,7 +176,8 @@ decrement	KEYWORD2
 enter	KEYWORD2
 
 MenuScreen	KEYWORD1
-addMenu	KEYWORD2
+addScreen	KEYWORD2
+removeScreen	KEYWORD2
 
 GraphicsItem	KEYWORD1
 addItem	KEYWORD2

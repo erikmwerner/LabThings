@@ -14,6 +14,8 @@
 * 
 */
 struct UiContext {
+  //< a pointer to the U8G2 display object. 
+  // is object also contains lots of useful data, like width and height
   U8G2* display = nullptr;
   const uint8_t _margin;
   const uint8_t* _font_large;
@@ -43,21 +45,23 @@ struct UiContext {
        display->drawBox( 0, 0, display->getDisplayWidth(), display->getDisplayHeight() );
        display->setDrawColor(1);
     }
-    void setFont(const uint8_t* font) {
+    void setCurrentFont(const uint8_t* font) {
        display->setFont(font);
     }
-    const uint8_t* fontLarge() const {
+    const uint8_t* getFontLarge() const {
       return _font_large;
     }
-    const uint8_t* fontMedium() const {
+    const uint8_t* getFontMedium() const {
       return _font_medium;
     }
-    const uint8_t* fontSmall() const {
+    const uint8_t* getFontSmall() const {
       return _font_small;
     }
-    const uint8_t* fontSymbol() const {
+    const uint8_t* getFontSymbol() const {
       return _font_symbol;
     }
+
+    const uint8_t getMargin() const { return _margin; }
     
 };
 

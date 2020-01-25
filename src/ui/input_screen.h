@@ -18,9 +18,11 @@ class NumberScreen : public MenuScreen {
     
   public:
   NumberScreen(MenuScreen* parent, UiContext* context, const char* title,  T min_value = 0, T max_value = 100)
-  : MenuScreen(parent, context, title), 
-    _number( NumberItem<T>(this, context->fontLarge(), 56, 54, 0, 0, min_value, max_value) ) {
-      addChild(&_number); 
+  : MenuScreen(parent, context, title),_number(this, context->getFontLarge()) {
+    uint8_t h = context->display->getDisplayHeight() >> 1;
+    uint8_t x = (context->display->getDisplayWidth() - h) >> 1;
+    _number =  NumberItem<T>(this, context->getFontLarge(), x, h, h, h, min_value, max_value);
+    addChild(&_number); 
     }
     /*NumberScreen(MenuScreen* parent, UiContext* context, const char* title,  T min_value = 0, T max_value = 100, 
     const char* prefix = NULL, const char* suffix = NULL)
@@ -61,7 +63,8 @@ class NumberScreen : public MenuScreen {
     void draw(UiContext* context) {
       //context->display->firstPage();
       //do {
-        context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1, 24);
+        // print centered title with top of character at the top pixel of the screen
+        context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1, context->display->getAscent());
         MenuScreen::printTitle(context);
         //print value
         _number.draw(context);

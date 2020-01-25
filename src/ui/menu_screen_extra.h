@@ -47,7 +47,7 @@ class ProgressBarScreen : public InputScreen<T> {
     void draw(UiContext* context) {
       //context->display->firstPage();
       //confirm font
-      context->setFont(context->fontLarge());
+      context->setCurrentFont(context->getFontLarge());
       //do {
         //context->display->setCursor( (context->display->getDisplayWidth() - MenuScreen::titleWidth(context) ) >> 1, 24);
         //MenuScreen::printTitle(context);

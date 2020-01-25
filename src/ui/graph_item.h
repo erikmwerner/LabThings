@@ -70,7 +70,13 @@ class DataSet : public RingBuffer<POINTS, DataPoint<T> > {
     
 };
 
-//template <typename T, uint8_t POINTS>
+/*!
+ * @brief the GraphItem class...
+ * 
+ * @tparam T 
+ * @tparam POINTS 
+ * @tparam SelectInteger<POINTS>::type 
+ */
 template <typename T, int POINTS, class TS = typename SelectInteger<POINTS>::type>
 class GraphItem : public GraphicsItem {
     const char* _title = NULL;
@@ -81,6 +87,7 @@ class GraphItem : public GraphicsItem {
     float _x_scale = 1;
     float _y_scale = 1;
     
+    //< store the size of the graph. default values for a 128x64 px oled
     const uint8_t GRAPH_X = 16;
     const uint8_t GRAPH_Y = 8;
     const uint8_t GRAPH_W = 48;
@@ -166,7 +173,7 @@ class GraphItem : public GraphicsItem {
         context->display->drawHLine(GRAPH_X, GRAPH_H + GRAPH_Y ,GRAPH_W);
         
         //print x labels
-        context->setFont(context->fontSmall());
+        context->setCurrentFont(context->getFontSmall());
         uint8_t padding_left = ( GRAPH_W - context->display->getStrWidth(_x_label) ) >> 1;
         context->display->setCursor(padding_left + GRAPH_X, GRAPH_H + GRAPH_Y + 8);
         context->display->print(_x_label);
@@ -183,15 +190,27 @@ class GraphItem : public GraphicsItem {
         context->display->drawStr(GRAPH_X, GRAPH_H + GRAPH_Y - padding_top, _y_label);
         context->display->setFontDirection(0);
         
-        context->display->setCursor(GRAPH_X, GRAPH_H + GRAPH_Y);
+        context->display->setCursor(GRAPH_X + 1, GRAPH_H + GRAPH_Y);
         context->display->print(dataSet.yMin(), 2); //DEC?
         
-        context->display->setCursor(GRAPH_X, GRAPH_Y + 8);
+        context->display->setCursor(GRAPH_X + 1, GRAPH_Y + 8);
         context->display->print(dataSet.yMax(), 2); //DEC?
     }
     
     
   public:
+  /*!
+   * @brief Construct a new Graph Item object
+   * 
+   * @param parent 
+   * @param title 
+   * @param x_label 
+   * @param y_label 
+   * @param x 
+   * @param y 
+   * @param w 
+   * @param h 
+   */
     GraphItem(GraphicsItem* parent, const char* title = NULL, 
     const char* x_label = NULL, const char* y_label = NULL, 
     const uint8_t x = 8, const uint8_t y = 8, const uint8_t w = 64, const uint8_t h = 48)
@@ -210,7 +229,7 @@ class GraphItem : public GraphicsItem {
     }
     void draw(UiContext* context) {
       //confirm font
-      context->setFont(context->fontSmall());
+      context->setCurrentFont(context->getFontSmall());
       //do {
         drawAxes(context);
         if( !dataSet.isEmpty() ) {

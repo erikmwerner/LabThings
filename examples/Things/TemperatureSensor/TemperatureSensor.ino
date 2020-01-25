@@ -1,3 +1,17 @@
+/* 
+ Lab Things Thermometer Example
+ ESP8266
+ 128 x 32px OLED (SSD1306)
+ Digital button input
+ 1-wire communication DS18B20 digital temperature sensor
+ USB Serial
+ WiFi
+ 
+ Copyright (c) 2020 Erik Werner erikmwerner@gmail.com
+ All rights reserved.
+
+*/
+
 // Include the objects we need to use
 #include <LabThings.h>
 
@@ -115,7 +129,7 @@ class LT_DS18B20 : public OneWire, public LT_Sensor {
     }
 };
 
-char controllerName[] = "DS18B20 Temp Sensor";
+char controllerName[] = "Lab Things DS18B20";
 
 // define the message delimiters to avoid storing
 // multiple copies and save a little RAM
@@ -141,12 +155,12 @@ LT_DebouncedButton buttonB(device_manager.registerDevice(), 16, true);
 LT_DebouncedButton buttonC(device_manager.registerDevice(), 2, true);
 
 // Declare ui elements
-UiContext context(&u8g2, 0);
+UiContext context(&u8g2, 2, u8g2_font_helvB08_tr, u8g2_font_tom_thumb_4x6_tr, u8g2_font_tom_thumb_4x6_tr);
 Ui ui(device_manager.registerDevice(), context);
 MainMenu<3> screen_main(NULL, &context, "Menu");
 NumberScreen<float> screen_temperature(&screen_main, &context, "Temperature (C)", -100.0, 100.0);
 MenuScreen screen_graph(&screen_main, &context, "Graph");
-GraphItem<float, 32> graph(&screen_graph, NULL, "time", "T (C)", 8, 8, 128, 24);
+GraphItem<float, 32> graph(&screen_graph, NULL, "time [ms]", "T (C)", 8, 0, 128, 24);
 AboutScreen screen_about(&screen_main, &context, "About");
 
 
@@ -160,13 +174,12 @@ void setup() {
   temp_sensor.setNewDataCallback(onNewSensorData);
 
   ui.setCurrentScreen(&screen_main);
-  screen_main.addMenu(&screen_temperature);
-  context.setFont(context.fontSmall());
+  screen_main.addScreen(&screen_temperature);
 
   graph.setGraphType(2);
   screen_graph.addChild(&graph);
-  screen_main.addMenu(&screen_graph);
-  screen_main.addMenu(&screen_about);
+  screen_main.addScreen(&screen_graph);
+  screen_main.addScreen(&screen_about);
 
   messenger.setMessageReceivedCallback(onMessageReceived);
 
@@ -219,23 +232,23 @@ void onButtonCReleased() {
 
 // Define callback functions to use devices
 //----------------------------------------------------------------------------//
-void onGetControllerName() {
+void onGetControllerName(void*) {
   Serial << SOM << LT::Read_Name
          << SEP << controllerName << EOM;
 }
 
-void onGetControllerFirmwareVersion() {
+void onGetControllerFirmwareVersion(void*) {
   Serial << SOM << LT::Read_Name
          << SEP << LT_VERSION << EOM;
 }
 
-void onReadSensorValue() {
+void onReadSensorValue(void*) {
   // there is only 1 sensor, so skip ID checking
   if (temp_sensor.readSensor() == 0) {
-    onNewSensorData();
+    //onNewSensorData();
   }
   else {
-    printError((uint8_t)LT::Read_Sensor_Value);
+    printError((const char *)LT::Read_Sensor_Value);
   }
 }
 

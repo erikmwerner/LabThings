@@ -101,21 +101,23 @@ class TextScreen : public MenuScreen {
     }
 
     virtual void draw(UiContext* context) {
-        //confirm settings
-        context->setFont(context->fontLarge());
+        // confirm settings and print title
+        context->setCurrentFont(context->getFontLarge());
+        // write pixels to on
         context->display->setDrawColor(1);
-
-        //print title
-        context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1 , 16);
+        // print centered title with top of characters at top pixels of the screen
+        context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1 , context->display->getAscent() );
         MenuScreen::printTitle(context);
 
-        //draw seperator
-        context->display->drawLine(0, 20, context->display->getDisplayWidth(), 20);
+        //draw seperator line at the botton of the title
+        context->display->drawLine(0, context->display->getMaxCharHeight(), context->display->getDisplayWidth(), context->display->getMaxCharHeight() );
 
+
+        //TK getDisplayWidth, getStrWidth, getMaxCharWidth
         //print text
-        context->setFont(context->fontSmall());
-        uint8_t h = 36;
-        context->display->setCursor(0, h);
+        uint8_t h = context->display->getMaxCharHeight() * 2 + context->getMargin();
+        context->setCurrentFont(context->getFontSmall());
+        context->display->setCursor(context->getMargin(), h);
         printText(context);
     }
 };

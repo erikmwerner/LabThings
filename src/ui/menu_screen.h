@@ -24,6 +24,12 @@ size_t getFlashStringLength(const __FlashStringHelper *ifsh)
 
 //idea: MenuScreen<__FlashStringHelper*>
 //template <class T>
+
+/*!
+ * @brief the MenuScreen provides a base class for a screen.
+ * A screen is a representation of graphics items to be displayed
+ * 
+ */
 class MenuScreen : public GraphicsItem{
     MenuScreen* _parent = nullptr;
     const char* _title = NULL;
