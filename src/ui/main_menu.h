@@ -57,7 +57,7 @@ class MainMenu : public MenuScreen {
         list_top = 20;//* _list_elm_height;
 
         // calculate the number of item to show on the menu
-        uint8_t num_show = context->display->getScreenHeight() / _list_elm_height + 1;
+        uint8_t num_show = context->display->getDisplayHeight() / _list_elm_height + 1;
 
       }
     MainMenu(MenuScreen* parent, const __FlashStringHelper* title, UiContext* context)

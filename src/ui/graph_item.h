@@ -4,6 +4,7 @@
 #include "graphics_item.h"
 #include "../utilities/ring_buffer.h"
 
+//
 namespace LT
 {
     enum GraphType : uint8_t
@@ -196,8 +197,7 @@ class GraphItem : public GraphicsItem {
         context->display->setCursor(GRAPH_X + 1, GRAPH_Y + 8);
         context->display->print(dataSet.yMax(), 2); //DEC?
     }
-    
-    
+  
   public:
   /*!
    * @brief Construct a new Graph Item object
