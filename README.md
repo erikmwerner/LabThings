@@ -1,7 +1,7 @@
 # Lab Things
 Lab Things is an Arduino library for creating connected research tools. It includes classes to accomplish all of the most common requirements when creating a standalone device, including:
 
-* [`DeviceManager`](src/devies/devices.md): Manage multiple input and output devices with cooperative multitasking
+* [`DeviceManager`](src/devices/devices.md): Manage multiple input and output devices with cooperative multitasking
 * [`ProcessManager`](src/messengers/process_manager.md): Execute time-dependent sequences of operations
 * [`ASCIISerial` and `BinarySerial` messengers](src/messengers/messengers.md): Communicate between devices consistancy and clarity
 * [`Ui`](src/ui/ui.md): Build detailed user interfaces and leave MCU resources to spare
