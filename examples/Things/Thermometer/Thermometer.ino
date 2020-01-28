@@ -94,11 +94,11 @@ class LT_DS18B20 : public OneWire, public LT_Sensor {
     // this function gets called every time the sensor is polled
     uint8_t readSensor() {
 
-      if(!has_sensor) { return 2 }; // no sensor error
+      if(!has_sensor) { return 2; } // no sensor error
       // the sensor defaults to 12-bit. Conversions take Max 750 ms
       if (LT_current_time_us - converstion_start_time > conversion_time_us) {
         // New data is ready. Read and convert it
-        present = OneWire::reset();
+        OneWire::reset();
         OneWire::select(addr);
         OneWire::write(0xBE); // Read Scratchpad
         for (uint8_t i = 0; i < 9; i++) {           
@@ -137,6 +137,7 @@ class LT_DS18B20 : public OneWire, public LT_Sensor {
           
         }
         celsius = (float)raw / 16.0;
+        //fahrenheit = celsius * 1.8 + 32.0;
         requestData(); // request more data right away
         return 0; // return success
       }
@@ -174,7 +175,7 @@ MessageHandler handler;
 // Define device manager to switch between devices
 DeviceManager<6> device_manager;
 
-// The OneWire data wire is plugged into pin 14 on the Arduino
+// The OneWire data wire is plugged into pin 14 (with 4.7k pullup resistor)
 LT_DS18B20 temp_sensor( device_manager.registerDevice(), 14 );
 
 // Adafruit Feather ESP8266/32u4 Boards + FeatherWing OLED
@@ -186,11 +187,11 @@ LT_DebouncedButton buttonA(device_manager.registerDevice(), 0, true);
 LT_DebouncedButton buttonB(device_manager.registerDevice(), 16, true);
 LT_DebouncedButton buttonC(device_manager.registerDevice(), 2, true);
 
-// Declare ui elements
+// Declare ui elements. Use small fonts for the small screen
 UiContext context(&u8g2, 2, u8g2_font_helvB08_tr, u8g2_font_tom_thumb_4x6_tr, u8g2_font_tom_thumb_4x6_tr);
 Ui ui(device_manager.registerDevice(), context);
 MainMenu<3> screen_main(NULL, &context, "Menu");
-NumberScreen<float> screen_temperature(&screen_main, &context, "Temperature (C)", -100.0, 100.0);
+NumberScreen<float> screen_temperature(&screen_main, &context, "Temperature (C)", -100.0, 150.0);
 MenuScreen screen_graph(&screen_main, &context, "Graph");
 GraphItem<float, 32> graph(&screen_graph, NULL, "time [ms]", "T (C)", 8, 0, 128, 24);
 AboutScreen screen_about(&screen_main, &context, "About");
