@@ -37,12 +37,12 @@
   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// Include the objects we need to use
-// To manage inputs and outputs of 4 devices
 #include <LabThings.h>
+
+// Declare a DeviceManager to manage inputs and outputs of 4 devices
 DeviceManager<4> device_manager;
 
-// Our MCU is connected to:
+// The MCU is connected to:
 // an encoder on pins 3 and 2 with pushbutton on pin 5
 LT_Encoder encoder(device_manager.registerDevice(), 3, 2, true);
 LT_DebouncedButton button(device_manager.registerDevice(), 5, true);
@@ -57,9 +57,6 @@ decode_results results;
 #include <SPI.h>
 #include <mcp4261.h>
 
-#include "fix_fft.h"
-char im[128], data[128];
-
 MCP4261 volumePot = MCP4261(7);
 MCP4261 bassPot = MCP4261(6);
 
@@ -71,6 +68,8 @@ MCP4261 bassPot = MCP4261(6);
   #undef _EEPROMEX_DEBUG
 #endif
 
+// a save timer object delays writing to the EEPROM
+// (this prevents writing too often)
 LT_Timer save_timer(device_manager.registerDevice(), 10000000); // 10 seconds
 
 // EEPROM address scheme
@@ -85,9 +84,13 @@ LT_Timer save_timer(device_manager.registerDevice(), 10000000); // 10 seconds
 //1306 on hardware SPI
 U8G2_SSD1306_128X64_NONAME_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
 
-// running a menu
+// displaying a user interface
 UiContext context(&u8g2);
 Ui ui(device_manager.registerDevice(), context);
+
+// for equalizer (not used yet) 
+//#include "fix_fft.h"
+//char im[128], data[128];
 
 // select screen has 6 items
 #define PGMSTR(x) (__FlashStringHelper*)(x)
@@ -130,21 +133,24 @@ SleepScreen screen_sleep(&screen_main, &context, "Sleep");
 TextScreen screen_about(&screen_main, &context, "About", "KPM Volume Pod V0.9");
 
 
-// these will be saved and stored in non-vilatile EEPROM
-int8_t volume = EEPROM.readInt(ADDR_Volume); // 2
-int8_t bass = EEPROM.readInt(ADDR_Bass); //10
-int8_t balance = EEPROM.readInt(ADDR_Balance); //50
-uint32_t ir_forward = EEPROM.readLong(ADDR_ir_f);
-uint32_t ir_reverse = EEPROM.readLong(ADDR_ir_r);
-uint32_t ir_select = EEPROM.readLong(ADDR_ir_s);
+// these variables will be saved and stored in non-vilatile EEPROM
+int8_t volume = EEPROM.readInt(ADDR_Volume); // the volume level
+int8_t bass = EEPROM.readInt(ADDR_Bass); // the bass level
+int8_t balance = EEPROM.readInt(ADDR_Balance); // the balance level
+uint32_t ir_forward = EEPROM.readLong(ADDR_ir_f); // ir command for "up"
+uint32_t ir_reverse = EEPROM.readLong(ADDR_ir_r); // ir command for "down"
+uint32_t ir_select = EEPROM.readLong(ADDR_ir_s); // ir command for "select"
 
 void setup() {
+  // start SPI communication
   SPI.setDataMode(SPI_MODE0);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV8);
   SPI.begin();
 
+
   volumePot.initialize();
+  bassPor.initialize();
   writePots();
   
   // IR receiver setup
@@ -244,11 +250,14 @@ void writePots() {
   else if (balance < 50) {
     wiper_r = volume - (50 - balance) / 100.0 * volume;
   }
+  else {
+    // balance is 50. set both wipers - volume
+  }
 
-  //Serial.print("L pot:");
-  //Serial.print(wiper_l);
-  //Serial.print(" R pot:");
-  //Serial.println(wiper_r);
+  Serial.print("L pot:");
+  Serial.print(wiper_l);
+  Serial.print(" R pot:");
+  Serial.println(wiper_r);
 
   volumePot.setWiper0(wiper_l);
   volumePot.setWiper1(wiper_r);
