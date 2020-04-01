@@ -231,7 +231,7 @@ class MainMenu : public MenuScreen {
      * For screens that are not stored in a full buffer, this will be as many
      * times as it takes to draw the full screen (ie 4 times for 1/4 buffer)
      * 
-     * @param context 
+     * @param context a pointer to the ui context with the screen info
      */
     void draw(UiContext* context) {
       // set to large font
@@ -277,7 +277,7 @@ class MainMenu : public MenuScreen {
       MenuScreen::printTitle(context);
 
       //draw horizontal seperator line
-      //context->display->drawLine(0, h_tot, context->display->getDisplayWidth(), h_tot);
+      context->display->drawLine(0, h_tot, context->display->getDisplayWidth(), h_tot);
 
       //list-top now starts at 22
       //text lower-left is 39

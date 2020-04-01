@@ -15,7 +15,7 @@
 */
 struct UiContext {
   //< a pointer to the U8G2 display object. 
-  // is object also contains lots of useful data, like width and height
+  // this object also contains lots of useful data, like width and height
   U8G2* display = nullptr;
   const uint8_t _margin;
   const uint8_t* _font_large;

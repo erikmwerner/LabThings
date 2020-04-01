@@ -10,16 +10,16 @@
 #include "ui_context.h"
 
 /*!
-* The Ui class manages objects that constitute a graphical user 
+* The Ui class manages the objects in a graphical user 
 * interface. It implements the composite design pattern,
 * where the Ui serves as the client and can manipulate a set of
 * objects that inherit from the GraphicsItem class.
-
+*
 * The Ui class inherits from LT_Device so it can be updated using the 
-* DeviceManager update() function. By default, type() returns LT::Ui.
+* DeviceManager update() function. By default, type() returns LT::Ui
 */
 class Ui : public LT_Device {
-    UiContext _context; ///< pointer to the graphics context (output device) TK
+    UiContext* _context; ///< pointer to the graphics context (output device)
     MenuScreen* _current_screen = nullptr; ///< pointer to the current screen
     MenuScreen* _home_screen = nullptr; ///< pointer to default screen
     
@@ -28,16 +28,17 @@ class Ui : public LT_Device {
     uint8_t _frames = 0;
     uint32_t _t_last_fps_update = 0;
     */
-    uint32_t _t_last_input_us = 0; ///< Keep track of the time since the last user input
-
+    uint32_t _t_last_input_us = 0; ///<  Track the time of the last user input
     
     uint32_t _return_home_timeout_us = 0; ///< Track time to automatically return home. Set to zero to disable.
     
-    
     uint32_t _screensaver_timeout_us = 0; ///< Track time to start a screensaver. Set to zero to disable
+
     bool _screensaver_enabled = false; ///< Enable screen saver option.
+    
     ///< If set to false, and the screensaver is activated, the display is put to sleep instead.
     bool _screensaver_active = false;
+
     bool _is_sleeping = false;
     
     /*
@@ -53,19 +54,28 @@ class Ui : public LT_Device {
     */
     
   public:
-    Ui( const uint8_t id, UiContext context ) 
+    Ui( const uint8_t id, UiContext *context ) 
     : LT_Device(id), _context(context){}
 
     LT::DeviceType type() const {return LT::Ui; }
-
+    
+    /**
+     * @brief this function is usually called when the ui is attached to a device manager
+     * 
+     */
     void begin() {
-      _context.begin();
+      _context->begin();
       //_t_last_fps_update = LT_current_time_us;
       //if ( _current_screen != NULL ) {
       //  _current_screen->draw(&_context);
       //}
     }
 
+    /**
+     * @brief check this ui and all of its objects and draw new graphics
+     *  if necessary. This function shoule be called as often as possible. 
+     * This function is usually called by the device manager.
+     */
     void update() {
       // main drawing function
       if( _current_screen != nullptr ) {
@@ -77,13 +87,13 @@ class Ui : public LT_Device {
           //  * twice if using half buffer (2)
           //  * four times if using quarter buffer (1)
           // for screens with many elements, full buffer will be much faster
-          _context.display->firstPage();
+          _context->display->firstPage();
           do {
-            _current_screen->draw(&_context);
+            _current_screen->draw(_context);
             if( _screensaver_active ) {
-              _context.levelWear();
+              _context->levelWear();
             }
-          } while ( _context.display->nextPage() );
+          } while ( _context->display->nextPage() );
 
           // (optional) calculate FPS
           //calcFPS();
@@ -94,7 +104,7 @@ class Ui : public LT_Device {
       }
       else {
         // clear the display if the current display is a null pointer
-        _context.display->clear();
+        _context->display->clear();
       }
       
       // check if it is time to return to home screen
@@ -102,7 +112,7 @@ class Ui : public LT_Device {
         if ( _current_screen != _home_screen ) {
           if ( ( LT_current_time_us - _t_last_input_us ) >= _return_home_timeout_us ) {
             setCurrentScreen( _home_screen );
-            _current_screen->draw(&_context);
+            _current_screen->draw(_context);
           }
         }
       }
@@ -131,12 +141,22 @@ class Ui : public LT_Device {
         }
       }
     }
+
+    /**
+     * @brief Set the Ui context
+     * 
+     * @param context a pointer at the context. This is expected to be
+     * a valud UiContext. This context will become the current context.
+     */
+    void setContext(UiContext *context) {
+      _context = context;
+    }
     
     // Sleep or wake the monitor. This always resets the screen saver
     void setSleeping( bool isSleeping ) {
       _is_sleeping = isSleeping;
       _screensaver_active = false;
-      _context.display->setPowerSave( isSleeping );
+      _context->display->setPowerSave( isSleeping );
     }
     
     bool isSleeping() {
