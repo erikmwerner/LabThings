@@ -89,16 +89,19 @@ class LT_DebouncedButton : public LT_Device {
          _button_went_low = false;
        }
     }
-    
-    // Method 1: Lockout mode
-    // only report position changes if t > debounce has elapsed
-    // this method responds to changes instantly
-    // the current button reading is stored in _button_state
+
+    /**************************************************************************/
+    /*!
+     * @brief Debouncing method 1: Lockout more
+     * only report changes if t > debounce has elapsed
+     * this method responds to changes instantly
+     * the current button reading is stored in _button_state
+     */
+    /**************************************************************************/
     inline void debounceLockout() {
       uint8_t reading = digitalRead(_pin);
-
-      // if the debounce interval has elapsed, save the button state
       if ( ( LT_current_time_us - _t_last_state_change_us ) >= _debounce_interval_us ) {
+        // if the debounce interval has elapsed, save the button state
         if ( reading != _button_state ) {
           _button_state = reading;
           onButtonStateChanged();
@@ -108,10 +111,14 @@ class LT_DebouncedButton : public LT_Device {
       }
     }
     
-    // Method 2: Steady mode
-    // store the first change and wait until things stop changing to report
-    // only report if it it's been stable for t > debounce
-    // this method waits until debounce has elapsed to respond
+    /**************************************************************************/
+    /*!
+     * @brief Debouncing method 2: Steady mode
+     * store the first change and wait until things stop changing to report
+     * only report if the signal has been stable for t > debounce
+     * this method waits until debounce has elapsed to respond.
+     */
+    /**************************************************************************/
     inline void debounceSteady() {
       uint8_t reading = digitalRead(_pin);
 

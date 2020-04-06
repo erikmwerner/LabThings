@@ -124,23 +124,39 @@ class LT_Encoder : public LT_Device {
         // look at the last 4 bits in _old_AB
         int8_t dir = ( lookup_table[ ( _old_AB & 0x0f ) ] );
         if(dir != 0) {
+        Serial.print(dir);
           if((LT_current_time_us - _t_last_state_change_us) >= _debounce_interval_us ) {
             _position += dir;
             _t_last_state_change_us = LT_current_time_us;
             _count = 0;
           _last_dir = dir;
+          Serial.print("\t debounce");
           }
           else {
             // either a bounce or a fast turn
             if(dir == _last_dir && _accelerate) {
+              // if four counts in a row in the same direction, accelerate
+              if(_count == 4) {
+                _position += 4 * dir;
+                _count++;
+                Serial.print("\t count end");
+                Serial.print(_count);
+              }
               if(_count > 4) {
                 _position += dir;
+                Serial.print("\t accel");
               }
               else {
                 _count++;
+                Serial.print("\t count");
+                Serial.print(_count);
               }
             }
           }
+          Serial.println("");
+        }
+        else {
+          // dir == 0
         }
       }
 };

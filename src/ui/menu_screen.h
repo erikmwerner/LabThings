@@ -33,29 +33,40 @@ size_t getFlashStringLength(const __FlashStringHelper *ifsh)
 class MenuScreen : public GraphicsItem{
     MenuScreen* _parent = nullptr;
     const char* _title = NULL;
+    const int _icon = NULL;
     const __FlashStringHelper* _flash_title = NULL;
     //Callback _screen_entered_callback = nullptr;
     func_ptr _screen_entered_callback = nullptr;
     
   public:
   MenuScreen() : GraphicsItem(nullptr, 0, 0, 0, 0) {}
-    MenuScreen(MenuScreen* parent, UiContext* context, const char* title)
+    MenuScreen(MenuScreen* parent, UiContext* context, const char* title, const int icon = 0)
       : GraphicsItem(nullptr, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
-       _parent(parent), _title(title) {
+       _parent(parent), _title(title), _icon(icon) {
       _flash_title = NULL;
     }
-    MenuScreen(MenuScreen* parent, UiContext* context, const __FlashStringHelper* title)
+    MenuScreen(MenuScreen* parent, UiContext* context, const __FlashStringHelper* title, const int icon = 0)
       : GraphicsItem(nullptr, 0, 0, context->display->getDisplayWidth(), context->display->getDisplayHeight() ),
-       _parent(parent), _flash_title(title) {
+       _parent(parent), _flash_title(title), _icon(icon) {
       _title = NULL;
     }
     const char* title() { return _title; }
     const __FlashStringHelper* flashTitle() const { return _flash_title; }
     MenuScreen* parent() { return _parent; }
 
+    /**
+     * @brief called by the ui when the user inputs "up"
+     * The base class sets a flag and gets redrawn.
+     * Reimplement this function in subclasses.
+     */
     virtual void increment() {
       setDirty(true);
     }
+    /**
+     * @brief called by the ui when the user inputs "down"
+     * The base class sets a flag and gets redrawn.
+     * Reimplement this function in subclasses.
+     */
     virtual void decrement() {
       setDirty(true);
     }
@@ -67,7 +78,7 @@ class MenuScreen : public GraphicsItem{
       _screen_entered_callback = c;
     }
     
-    virtual MenuScreen* enter() { 
+    virtual MenuScreen* enter() const { 
       if(_screen_entered_callback != nullptr) {
         (*_screen_entered_callback)(nullptr);
       }
@@ -89,7 +100,20 @@ class MenuScreen : public GraphicsItem{
        }
     }
     
-    void printTitle(UiContext* context) {
+    void printTitle(UiContext* context, const uint8_t x, const uint8_t y, const bool with_icon = false) {
+      
+      if(with_icon && _icon != 0) {
+        //Serial.println("glyph");
+        const uint8_t* last_font = context->getCurrentFont();
+        context->setCurrentFont(context->getFontSymbol());
+        context->display->drawGlyph(x - 1, y + 1, _icon);
+        context->display->setCursor(x + context->display->getMaxCharWidth(), y);
+        context->setCurrentFont(last_font);
+      }
+      else {
+        context->display->setCursor(x, y);
+      }
+      // print text
       if (_title != NULL) {
         context->display->print(_title);
       }

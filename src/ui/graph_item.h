@@ -84,7 +84,7 @@ class GraphItem : public GraphicsItem {
     const char* _x_label = NULL;
     const char* _y_label = NULL;
     
-    bool _label_last_point = true;
+    bool _label_last_point = false;
     float _x_scale = 1;
     float _y_scale = 1;
     

@@ -106,8 +106,10 @@ class TextScreen : public MenuScreen {
         // write pixels to on
         context->display->setDrawColor(1);
         // print centered title with top of characters at top pixels of the screen
-        context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1 , context->display->getAscent() );
-        MenuScreen::printTitle(context);
+        //context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1 , context->display->getAscent() );
+        uint8_t x = (context->display->getDisplayWidth() - titleWidth(context) ) >> 1;
+        uint8_t y = context->display->getAscent();
+        MenuScreen::printTitle(context, x, y);
 
         //draw seperator line at the botton of the title
         context->display->drawLine(0, context->display->getMaxCharHeight(), context->display->getDisplayWidth(), context->display->getMaxCharHeight() );

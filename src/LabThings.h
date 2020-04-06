@@ -48,6 +48,7 @@ const static float LT_VERSION = 0.19;
 #include "devices/digital_sensor.h"
 #include "devices/encoder.h"
 #include "devices/stepper.h"
+#include "devices/buzzer.h"
 
 //requires U8G2
 #include "ui/ui.h"

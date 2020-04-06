@@ -13,20 +13,21 @@
 /**************************************************************************/
 #if defined(ARDUINO_ARCH_ESP32)
 class LT_AnalogOutput : public LT_DigitalOutput {
-    const uint8_t _channel;
+  protected:
+    const uint8_t m_channel;
   public:
     LT_AnalogOutput(const uint8_t id, const uint8_t pin, const uint8_t channel) 
-    : LT_DigitalOutput(id, pin), _channel(channel) {}
+    : LT_DigitalOutput(id, pin), m_channel(channel) {}
     virtual LT::DeviceType type() const { return LT::AnalogOutput; }
     
     void begin() {
-      ledcAttachPin(_pin, _channel);
-      ledcSetup(_channel, 12000, 8); // 12 kHz PWM, 8-bit resolution
+      ledcAttachPin(_pin, m_channel);
+      ledcSetup(m_channel, 12000, 8); // 12 kHz PWM, 8-bit resolution
     }
     
     void setValue(const int value) {
       _value = value;
-      ledcWrite(_channel, _value);
+      ledcWrite(m_channel, _value);
     }
     LT_AnalogOutput* instance(){ return this; }
 };

@@ -46,7 +46,7 @@ class MessageHandler {
      * @param sender an optional pointer at the object
      * that sent the message
      */
-    void handleMessage( int index, void* sender = nullptr ) {
+    void handleMessage( int index, void* sender = nullptr ) const {
       if (index >= 0 && index < MAX_FUNCTIONS) {
         if(_function_list[index] != nullptr) {
           (_function_list[index])(sender);
@@ -97,7 +97,7 @@ class MessageHandler {
      * 
      * @return uint8_t the number of callback functions that have been registered
      */
-    uint8_t attachedFunctionCount() {
+    const uint8_t attachedFunctionCount() const {
       uint8_t count = 0;
       for(uint8_t i = 0; i<MAX_FUNCTIONS; ++i) {
         if(_function_list[i] != nullptr) {

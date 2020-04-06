@@ -86,7 +86,7 @@ class Ui : public LT_Device {
           //  * once for full buffer (F), 
           //  * twice if using half buffer (2)
           //  * four times if using quarter buffer (1)
-          // for screens with many elements, full buffer will be much faster
+          // when drawings many graphics, a full buffer is much faster
           _context->display->firstPage();
           do {
             _current_screen->draw(_context);

@@ -4,71 +4,96 @@
 #include "menu_screen.h"
 #include "ui_context.h"
 
+/**
+ * @brief 
+ * 
+ * @tparam MAX_SCREENS defines the maximum number of list entries in the menu
+ */
 template < uint8_t MAX_SCREENS >
 class MainMenu : public MenuScreen {
     
-    //< the index of the current screen
-    volatile uint8_t _value = 0;
+    volatile uint8_t _value = 0; //< the index of the current screen
+    uint8_t _last_value = 0; //< the index of the previous screen
 
-    //< the index of the previous screen
-    uint8_t _last_value = 0;
+    uint8_t _properties = 5; //< holds appearance settings
+    // b0 = underline / no underline
+    // b1 = midline / no midline
+    // b2 = animate / no animation
+    // b3...b7 unused
 
-    //uint8_t _scroll_speed = 4;
-    uint8_t _frames_to_go = 0;
-    uint8_t _list_elm_height = 0;//11;
+    uint8_t _h_title_txt = 0; //< max rise of characters in font used for title
+    uint8_t _title_stop= 0;
+    uint8_t _h_list_txt = 0; //< max rise of characters in font used for list elements
+    uint8_t _h_list_elm = 0; //< max rise of characters in font used for list elements
+    uint8_t _w_tot = 0; //< total width of the screen
+    uint8_t _list_count = 0;
+    int8_t _offset = 0;
 
     //< an array of pointers to child screens
     MenuScreen* _sub_menus[MAX_SCREENS] = {nullptr};
-    uint8_t _screen_count = 0;
-
-    ////////
-
-    //< index of the previous screen to scroll from
-    int prev_screen = 0;
-    //< index of the previous screen to scroll to
-    int next_screen = 1;
-    //< index of the next next screen to scroll to
-    int next_next_screen = 2;
-    //< y pixel for the top of the list (top of screen - text height)
-    int list_top = 0;//10;
-
-    //< distance to offset list top at the start of the scroll
-    //< can be + or -
-    int8_t scroll_offset = 10; 
+    uint8_t _screen_count = 0; //< the number of screens in the list
+    uint8_t _list_show_count = 0;
 
     //< flag to track if currently scrolling
-    bool _scrolling = false;
+    int8_t _scroll_step = 1;
+    int8_t _scroll_offset = 0;
+    uint8_t _scroll_frames = 5;
 
+    /**
+     * @brief returns the index of the next screen in the list. rolls over
+     * if the current screen is the final screen
+     * 
+     * @param current 
+     * @return uint8_t 
+     */
     uint8_t nextScreenIndex(const uint8_t current) const {
       uint8_t next_index = current + 1;
       return (next_index < _screen_count) ? next_index : 0;
-      
     }
 
+    /**
+     * @brief returns the index of the previous screen in the list.
+     * Rolls over if the current screen is the first screen
+     * 
+     * @param current 
+     * @return uint8_t 
+     */
     uint8_t previousScreenIndex(const uint8_t current) const {
       return (current == 0) ?  (_screen_count - 1) : (current - 1);
     }
 
   public:
-    MainMenu(MenuScreen* parent, UiContext* context, const char* title)
-      : MenuScreen(parent, context, title) {
+    MainMenu(MenuScreen* parent, UiContext* context, const char* title, const int icon = 0)
+      : MenuScreen(parent, context, title, icon) {
+        if(parent != nullptr) {
+          addScreen(parent);
+        }
         context->setCurrentFont(context->getFontLarge());
-        _list_elm_height = context->display->getMaxCharHeight();
-        list_top = 20;//* _list_elm_height;
-
-        // calculate the number of item to show on the menu
-        uint8_t num_show = context->display->getDisplayHeight() / _list_elm_height + 1;
-
+        _h_title_txt = context->display->getAscent();
+        // compute the total height of the title, including underline style options
+        _title_stop = _h_title_txt + (_properties & 0x1 ? 4 : 2);
+        context->setCurrentFont(context->getFontMedium());
+        _h_list_txt = context->display->getAscent();
+        _w_tot = context->display->getDisplayWidth();
+        // compute the remaining display height left over for list elements
+        uint8_t list_height = context->display->getDisplayHeight() - _title_stop;
+        // compute the height of each list element
+        _h_list_elm = context->display->getMaxCharHeight() + 2 * context->getMargin() - 1;
+        // calulate the number of items in the list that will be visible at any time
+        // 2 is spacing between list rows (hard coded for now)
+        _list_show_count = (list_height)/( _h_list_elm+ 1) + 1; // add one and round up
       }
-    MainMenu(MenuScreen* parent, const __FlashStringHelper* title, UiContext* context)
-      : MenuScreen(parent, context, title) {}
+
+    // alternate constructor for storing text in flash
+    //MainMenu(MenuScreen* parent, const __FlashStringHelper* title, UiContext* context)
+     // : MenuScreen(parent, context, title) {}
 
     /*!
-     * @brief 
+     * @brief adds a screen to the menu. The screen is inserted at the end of the list.
      * 
-     * @param screen 
-     * @return true 
-     * @return false 
+     * @param screen a pointer to the screen to add
+     * @return true if the screen was added to the list
+     * @return false if the screen was not added (the list is full)
      */
     bool addScreen(MenuScreen * screen) {
       if (_screen_count < MAX_SCREENS) {
@@ -81,10 +106,10 @@ class MainMenu : public MenuScreen {
     }
 
     /*!
-     * @brief 
+     * @brief removes the last screen from the list
      * 
-     * @return true 
-     * @return false 
+     * @return true if a screen was removed from the end of the list
+     * @return false if a screen could not be removed (the list is empty)
      */
     bool removeScreen() {
       if(_screen_count > 0) {
@@ -97,190 +122,159 @@ class MainMenu : public MenuScreen {
     }
 
     /*!
-     * @brief 
+     * @brief counts the number of screens in the list
      * 
-     * @return uint8_t 
+     * @return uint8_t the number of screens in the list
      */
     uint8_t count() const {return _screen_count;}
 
-    /*
-    void setScrollSpeed(uint8_t scroll_speed) {
-        _scroll_speed = scroll_speed;
-    }*/
-
     /*!
-     * @brief move to the next screen
-     * 
+     * @brief Called by the ui when the user inputs "up.
+     * Moves the selected screen to the next screen in the list
+     * and requests a redraw
      */
     void increment() {
-      if(_scrolling) return;
+      if(_scroll_offset != 0) return;
       _last_value = _value;
       _value = nextScreenIndex(_value);
+      
       setDirty(true);
-      updateScrollData();
+      _scroll_offset = _h_list_elm;
+      _scroll_step = -_h_list_elm/4;
     }
 
     /*!
-     * @brief move to the previous screen
-     * 
+     * @brief Called by the ui when the user inputs "down."
+     * Moves the selected screen to the previous screen in the list
+     * and requests a redraw
      */
     void decrement() {
-      if(_scrolling) return;
+      if(_scroll_offset != 0) return;
       _last_value = _value;
       _value = previousScreenIndex(_value);
+      
       setDirty(true);
-      updateScrollData();
+      _scroll_offset = -_h_list_elm;
+      _scroll_step = _h_list_elm/4;
     }
 
-    MenuScreen* enter() {
-      if(_scrolling) {
-        return _sub_menus[_last_value];
+    /**
+     * @brief 
+     * 
+     * @return MenuScreen* a pointer at the screen that was selected
+     */
+    MenuScreen* enter() const {
+      if(_scroll_offset == 0) {
+        return _sub_menus[_value];
       } 
       else {
-        return _sub_menus[_value];
+        return _sub_menus[_last_value];
       }
-      //_sub_menus[_value]->setDirty(true);
-      //updateScrollData();
     }
 
     /*!
      * @brief called whenever the menu needs to be redrawn
+     * If the menu is scrolling, this function will
+     * keep the dirty flag set until the scrolling is complete.
      * 
      * @param dirty 
      */
     void setDirty(bool dirty) {
       
-      if(!_scrolling) {
+      if(_scroll_offset == 0) {
         // not scrolling, call base class
         MenuScreen::setDirty(dirty);
       }
       else {
-          // scrolling. set the list top
-          list_top += scroll_offset;
-        // finally, check if there are more frames to draw
-        --_frames_to_go;
-        if( _frames_to_go == 0 ) {
-          //_last_value = _value; //store last value to prevent scrolling on menu show
-          //Serial.println("done scrolling");
-          //Serial.println("........");
-          //Serial.println(LT_current_time_us);
-          _scrolling = false;
+        // in the middle of scrolling...
+        _scroll_offset += _scroll_step;
+        if(abs(_scroll_offset) < abs(_scroll_step)) {
+          _scroll_offset = 0;
         }
       }
     }
 
-    /*!
-     * @brief sets up member variables at the start of a scroll
-     * when scrolling "down", the list of menus on-screen is drawn
-     * and one additional menu is added to the bottom.
-     * 
-     * When scrolling "up", the list of menus on-screen is drawn and
-     * one additional menu is added to the top.
-     * 
-     */
-    void updateScrollData() {
-      // collect some info about the screens that will be scrolled through
-      // this depends on screen height and font height
-      prev_screen = previousScreenIndex(_value);
-      next_screen = nextScreenIndex(_value);
-      next_next_screen = nextScreenIndex(next_screen);
-      //prev_screen = (_value - 1 + _screen_count) % _screen_count;
-      //next_screen = (_value + 1) % _screen_count;
-      //next_next_screen = (next_screen + 1) % _screen_count;
-    
-      //int8_t d2go = con
-      // test for scroll direction
-       if ( (_last_value == next_screen) && (scroll_offset != 0) ) {
-        // scroll up
-        //scroll_offset = 5;
-        //list_top = 18; // text box h 
-        scroll_offset = 2;
-        list_top = 10;
-
-        // draw scrolling animation in 4 frames
-        // (frames * offset = distance scrolled [px] )
-        _frames_to_go = 5; // (20px/5px) + 1
-      }
-      else if ( (_last_value == prev_screen) && (scroll_offset != 0) ) {
-        //scroll down
-        //scroll_offset = -5;
-        //list_top = 58; //~ screen height
-        scroll_offset = -2;
-        list_top = 30; //~ screen height
-
-        // draw scrolling animation in 4 frames
-        // (frames * offset = distance scrolled [px] )
-        _frames_to_go = 5;
-      }
-      else {
-       // Serial.println("s no");
-        // don't scroll
-        // jump stright to the next item (no scrolling)
-        //scroll_offset = 20;
-        //list_top = 38; 
-        scroll_offset = 12; // make the height of each scroll 12
-        list_top = 20;
-        _frames_to_go = 1; // only draw 1 frame (the completed scroll)
-      }
-      _scrolling = true;
-    }
+    void setProperties(const uint8_t properties) { _properties = properties;}
 
     /*!
-     * @brief this function is called by the main program loop
-     * if this object has been set dirty. 
+     * @brief this function is called by ui from the main program loop if
+     * the _dirty flag has been set to true.
      * For screens that are not stored in a full buffer, this will be as many
      * times as it takes to draw the full screen (ie 4 times for 1/4 buffer)
      * 
      * @param context a pointer to the ui context with the screen info
      */
     void draw(UiContext* context) {
-      // set to large font
-      context->setCurrentFont(context->getFontLarge());
-      uint8_t w_tot = context->display->getDisplayWidth();
-      uint8_t h_txt = context->display->getAscent();
-      uint8_t margin = context->getMargin();
-      uint8_t h_tot = h_txt + margin;
-
-      //draw selection bar first
-      context->display->setDrawColor(1); // draw color 1 = foreground color 1 (on)
-      // draw a box around the selected text (x, y, w, h)
-      context->display->drawBox(0, _list_elm_height , w_tot, _list_elm_height);
-      Serial<<_list_elm_height;
+      Serial.print("Value:");
+      Serial.print(_value);
+      Serial.print(" Draw. Offset:");
+      Serial.print(_scroll_offset);
+      Serial.print(" step:");
+      Serial.println(_scroll_step);
 
       // draw the list of submenus
+      context->setCurrentFont(context->getFontMedium());
       context->display->setDrawColor(2); // draw color 2 = xor
-      // set point to bottom left character of first menu entry
-      context->display->setCursor(margin, list_top - _list_elm_height);
-      if(_sub_menus[prev_screen] != nullptr)
-        _sub_menus[prev_screen]->printTitle(context);
-          
-      context->display->setCursor(margin, list_top);
-      if(_sub_menus[_value] != nullptr)
-        _sub_menus[_value]->printTitle(context);
       
-      context->display->setCursor(margin, list_top + _list_elm_height + margin);
-      if(_sub_menus[next_screen] != nullptr)
-        _sub_menus[next_screen]->printTitle(context);
-         
-      context->display->setCursor(margin, list_top + (2* _list_elm_height + margin) );
-      if(_sub_menus[next_next_screen] != nullptr)
-        _sub_menus[next_next_screen]->printTitle(context);
-         
-      // now black out behind the title
+      uint8_t draw_index = _value;
+      if(_scroll_offset == 0) {
+      // done scrolling
+        for(uint8_t i = 0; i < _list_show_count; ++i) {
+          uint8_t y = context->getMargin() + _title_stop + _h_list_txt + _h_list_elm*i;
+          uint8_t x = context->getMargin();
+          if(_sub_menus[draw_index] != nullptr) {
+            _sub_menus[draw_index]->printTitle(context, x, y, true);
+          }
+          else {}
+          draw_index = nextScreenIndex(draw_index);
+        } 
+        Serial.println("--FF--");
+      }
+      else if(_scroll_offset > 0) {
+        // scrolling up
+        // draw two extra items when scrolling
+        draw_index = previousScreenIndex(draw_index);
+        for(uint8_t i = 0; i < _list_show_count + 2; ++i) {
+          uint8_t y = _scroll_offset + context->getMargin() + _h_list_txt + _h_list_elm*i;
+          uint8_t x = context->getMargin();
+          if(_sub_menus[draw_index] != nullptr) {
+            _sub_menus[draw_index]->printTitle(context, x, y, true);
+          }
+          else {}
+          draw_index = nextScreenIndex(draw_index);
+        }
+      }
+      else {
+        // scrolling down
+        // draw two extra items when scrolling
+        for(uint8_t i = 0; i < _list_show_count + 2; ++i) {
+          uint8_t y = _scroll_offset + context->getMargin() + _title_stop + _h_list_txt + _h_list_elm*i;
+          uint8_t x = context->getMargin();
+          if(_sub_menus[draw_index] != nullptr) {
+            _sub_menus[draw_index]->printTitle(context, x, y, true);
+          }
+          else {}
+          draw_index = nextScreenIndex(draw_index);
+        }
+      }
+      // black out behind the title
       context->display->setDrawColor(0); // draw color 0 = foreground color 0 (off)
-      context->display->drawBox(0, 0, context->display->getDisplayWidth(), _list_elm_height);
-          
-      context->display->setDrawColor(1);
+      context->display->drawBox(0, 0, context->display->getDisplayWidth(), _title_stop);
 
       // draw centered title, position cursor to bottom of left-most character
-      context->display->setCursor( (context->display->getDisplayWidth() - titleWidth(context) ) >> 1, h_txt);
-      MenuScreen::printTitle(context);
-
-      //draw horizontal seperator line
-      context->display->drawLine(0, h_tot, context->display->getDisplayWidth(), h_tot);
-
-      //list-top now starts at 22
-      //text lower-left is 39
+      context->setCurrentFont(context->getFontLarge());
+      context->display->setDrawColor(1);
+      uint8_t x = (context->display->getDisplayWidth() - titleWidth(context) ) >> 1;
+      uint8_t y = _h_title_txt;
+      MenuScreen::printTitle(context, x, y);
+      if(_properties & 0x1) {
+        //draw horizontal seperator line
+        context->display->drawLine(0, _title_stop - 2, context->display->getDisplayWidth(), _title_stop - 2 );
+      }
+      //draw the selection bar
+      context->display->setDrawColor(2); // // draw color 2 = xor
+      // draw a box around the selected text (x, y, w, h)
+      context->display->drawBox(0, _title_stop , _w_tot, _h_list_elm);
     }
 };
 

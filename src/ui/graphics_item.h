@@ -298,6 +298,7 @@ public:
 template <typename T>
 class NumberItem : public GraphicsItem {
   volatile T _value = 0;
+  uint8_t _precision = 2;
   T _min_value;
   T _max_value;
   const uint8_t * _font;
@@ -314,21 +315,39 @@ class NumberItem : public GraphicsItem {
     context->display->print(_value, DEC);
   }
   void printValue(UiContext* context, identity<float>) {
-    int precision = 2;
     context->display->setCursor( left(), bottom() );
-    context->display->print(_value, precision);
+    context->display->print(_value, _precision);
   }  
       
   public:
-  NumberItem(GraphicsItem* parent, const uint8_t* font, uint8_t x = 0, uint8_t y = 0, uint8_t w = 0, uint8_t h = 0, T min_value = 0, T max_value = 100) 
-  : GraphicsItem(parent, x, y, w, h), _font(font), _min_value(min_value), _max_value(max_value){}
+  NumberItem(GraphicsItem* parent, const uint8_t* font, 
+  uint8_t x = 0, uint8_t y = 0, uint8_t w = 0, uint8_t h = 0, 
+  T min_value = 0, T max_value = 100) 
+  : GraphicsItem(parent, x, y, w, h), 
+  _font(font), _min_value(min_value), _max_value(max_value){}
   
+  /**
+   * @brief adds one to the current value. This function
+   * does no bounds checking
+   */
   void increment() {
     setValue(_value + 1);
   }
+  /**
+   * @brief subtracts one from the current value. This function
+   * does no bounds checking
+   */
   void decrement() {
     setValue(_value - 1);
   }
+
+  /**
+   * @brief Set the value variable
+   * 
+   * @param value the new value
+   * @param respond if true, attempts to call the value changed callback 
+   * (default = true). Set this to false to temporarily ignore changes
+   */
   void setValue(const T value, const bool respond = true) {
     _value = value;
     if (_value > _max_value) {
@@ -352,6 +371,15 @@ class NumberItem : public GraphicsItem {
   const T maxValue() {
     return _max_value;
   }
+
+  void setPrecision(const uint8_t decimals) {
+    _precision = decimals;
+  }
+  /**
+   * @brief Set the Value Changed Callback variable
+   * this callback is called when the current value is changed
+   * @param c 
+   */
   void setValueChangedCallback(Callback c) {
     _value_changed_callback = c;
   }
