@@ -18,8 +18,9 @@ class MainMenu : public MenuScreen {
     uint8_t _properties = 5; //< holds appearance settings
     // b0 = underline / no underline
     // b1 = midline / no midline
-    // b2 = animate / no animation
-    // b3...b7 unused
+    // b2 = animate scroll / no animation
+    // b3 = wrap / no wrap
+    // b4...b7 unused
 
     uint8_t _h_title_txt = 0; //< max rise of characters in font used for title
     uint8_t _title_stop= 0;
@@ -128,19 +129,29 @@ class MainMenu : public MenuScreen {
      */
     uint8_t count() const {return _screen_count;}
 
+    void adjust(const int8_t delta) {
+      if(_scroll_offset != 0) return;
+      _last_value = _value;
+      _value = (delta > 0) ? nextScreenIndex(_value) : previousScreenIndex(_value);
+      setDirty(true);
+      _scroll_offset = _h_list_elm * delta;
+      _scroll_step = -_h_list_elm/4 * delta;
+    }
+
     /*!
      * @brief Called by the ui when the user inputs "up.
      * Moves the selected screen to the next screen in the list
      * and requests a redraw
      */
     void increment() {
-      if(_scroll_offset != 0) return;
+      adjust(1);
+      /*if(_scroll_offset != 0) return;
       _last_value = _value;
       _value = nextScreenIndex(_value);
       
       setDirty(true);
       _scroll_offset = _h_list_elm;
-      _scroll_step = -_h_list_elm/4;
+      _scroll_step = -_h_list_elm/4;*/
     }
 
     /*!
@@ -149,13 +160,14 @@ class MainMenu : public MenuScreen {
      * and requests a redraw
      */
     void decrement() {
-      if(_scroll_offset != 0) return;
+      adjust(-1);
+      /*if(_scroll_offset != 0) return;
       _last_value = _value;
       _value = previousScreenIndex(_value);
       
       setDirty(true);
       _scroll_offset = -_h_list_elm;
-      _scroll_step = _h_list_elm/4;
+      _scroll_step = _h_list_elm/4;*/
     }
 
     /**
@@ -205,12 +217,12 @@ class MainMenu : public MenuScreen {
      * @param context a pointer to the ui context with the screen info
      */
     void draw(UiContext* context) {
-      Serial.print("Value:");
+      /*Serial.print("Value:");
       Serial.print(_value);
       Serial.print(" Draw. Offset:");
       Serial.print(_scroll_offset);
       Serial.print(" step:");
-      Serial.println(_scroll_step);
+      Serial.println(_scroll_step);*/
 
       // draw the list of submenus
       context->setCurrentFont(context->getFontMedium());
@@ -228,14 +240,13 @@ class MainMenu : public MenuScreen {
           else {}
           draw_index = nextScreenIndex(draw_index);
         } 
-        Serial.println("--FF--");
       }
       else if(_scroll_offset > 0) {
         // scrolling up
         // draw two extra items when scrolling
         draw_index = previousScreenIndex(draw_index);
         for(uint8_t i = 0; i < _list_show_count + 2; ++i) {
-          uint8_t y = _scroll_offset + context->getMargin() + _h_list_txt + _h_list_elm*i;
+          uint8_t y = _scroll_offset + _h_list_txt + _h_list_elm*i;
           uint8_t x = context->getMargin();
           if(_sub_menus[draw_index] != nullptr) {
             _sub_menus[draw_index]->printTitle(context, x, y, true);

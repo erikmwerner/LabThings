@@ -163,7 +163,13 @@ class Ui : public LT_Device {
       return _is_sleeping;
     }
 
-    // MenuScreen should not be NULL
+    /**
+     * @brief Set the Current Screen object and requests the display
+     * to redraw.
+     * 
+     * @param screen a pointer at the screen to display. This is
+     * expected to point at a valid screen object
+     */
     void setCurrentScreen(MenuScreen* screen) {
       _current_screen = screen;
       _current_screen->setDirty(true);
@@ -204,22 +210,34 @@ class Ui : public LT_Device {
 
     // user input functions
     void increment() {
-      _t_last_input_us = LT_current_time_us;
+      adjust(1);
+     /* _t_last_input_us = LT_current_time_us;
       if(_is_sleeping) { 
         setSleeping(false);
       }
       if(_current_screen != nullptr) {
         _current_screen->increment();
-      }
+      }*/
     }
 
     void decrement() {
-      _t_last_input_us = LT_current_time_us;
+      adjust(-1);
+      /*_t_last_input_us = LT_current_time_us;
       if(_is_sleeping) { 
         setSleeping(false);
       }
       if(_current_screen != nullptr) {
         _current_screen->decrement();
+      }*/
+    }
+
+    void adjust(const int8_t delta) {
+      _t_last_input_us = LT_current_time_us;
+      if(_is_sleeping) { 
+        setSleeping(false);
+      }
+      if(_current_screen != nullptr) {
+        _current_screen->adjust(delta);
       }
     }
 

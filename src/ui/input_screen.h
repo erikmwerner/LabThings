@@ -62,6 +62,8 @@ class NumberScreen : public MenuScreen {
     
     void setValue(const T value, const bool respond = true) {
      _number.setValue(value, respond);
+     Serial.print("set value:");
+     Serial.println(value);
     }
     
     void draw(UiContext* context) {
@@ -111,8 +113,13 @@ class InputScreen : public NumberScreen<T> {
       //_number.decrement();
     }
 
+    void adjust(const int8_t value) {
+      this->setValue(this->value() + value * _value_step);
+    }
+
     void adjust(const T value) {
-      this->setValue(this->value() + value);
+      this->setValue(this->value() + value * _value_step);
+      MenuScreen::adjust(value);
       //_number.increment();
     }
 

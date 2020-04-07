@@ -58,18 +58,25 @@ class MenuScreen : public GraphicsItem{
      * @brief called by the ui when the user inputs "up"
      * The base class sets a flag and gets redrawn.
      * Reimplement this function in subclasses.
-     */
+     
     virtual void increment() {
       setDirty(true);
     }
-    /**
+    
      * @brief called by the ui when the user inputs "down"
      * The base class sets a flag and gets redrawn.
      * Reimplement this function in subclasses.
-     */
+     
     virtual void decrement() {
       setDirty(true);
     }
+    */
+
+    //
+    virtual void adjust(const int8_t value) {
+      setDirty(true);
+    }
+
     virtual void setDirty(bool dirty) {
       GraphicsItem::setDirty(dirty);
     }
@@ -103,7 +110,6 @@ class MenuScreen : public GraphicsItem{
     void printTitle(UiContext* context, const uint8_t x, const uint8_t y, const bool with_icon = false) {
       
       if(with_icon && _icon != 0) {
-        //Serial.println("glyph");
         const uint8_t* last_font = context->getCurrentFont();
         context->setCurrentFont(context->getFontSymbol());
         context->display->drawGlyph(x - 1, y + 1, _icon);

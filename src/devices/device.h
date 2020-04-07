@@ -1,7 +1,7 @@
 #ifndef __DEVICE__H__
 #define __DEVICE__H__
 
-typedef void(*cb) (int);
+typedef void(*IntCallback) (int);
 
 namespace LT
 {
@@ -23,6 +23,8 @@ namespace LT
 
 class LT_Device {
     const uint8_t _udid;
+  protected:
+    IntCallback _error_callback = nullptr;
     
   public:
     LT_Device(const int id) : _udid(id) {}
@@ -31,6 +33,7 @@ class LT_Device {
     virtual void update() {}
     virtual void begin() {}
     virtual void* instance() {return this;}
+    virtual void setErrorCallback(IntCallback c) {_error_callback = c;}
 };
 
 // bring in a global external variable to keep track of time
