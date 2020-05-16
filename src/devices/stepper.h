@@ -170,19 +170,44 @@ class LT_Stepper : public LT_Device {
       }
     }
     
-    // read the motor speed and avoid float calculation
+    /**
+     * @brief Can be used to read the motor speed 
+     * while avoiding a float calculation.
+     * 
+     * \sa getResolution()
+     * 
+     * @return uint32_t the number of microseconds between steps
+     */
     uint32_t getInterval() const { return _interval; }
+
+    /**
+     * @brief Get the resolution of the motor
+     * 
+     * @return uint16_t the number of steps required for
+     * the motor to make one full revolution.
+     */
     uint16_t getResolution() const { return _resolution; }
     
-    // expects a position argument between 0 and _resolution
-    // common _resolution values are 200, 400, 800, 1600
-    // useful for setting index or zero position
-    // use rotate() to move to a specific angle
+    /**
+     * @brief Set the current position of the motor. This does not
+     * instruct the motor to turn. Used for setting an index
+     * or zero position. To turn the motor to a specific angle,
+     * use \sa rotate().
+     * 
+     * @param position a position between 0 and _resolution.
+     * Common _resolution values are 200, 400, 800, 1600
+     */
     void setPosition(const uint16_t position) {
       updatePosition(position);
     }
     
-    // take the specified number of steps. use negative (-) for anti-clockwise rotation
+    /**
+     * @brief Instruct the motor to take a specific number of steps.
+     * 
+     * @param steps The number of steps to take. Use negative (-)
+     * values for anti-clockwise rotation
+     * @param rpm The speed of rotation in RPM
+     */
     void rotate(int16_t steps, float rpm) {
       // save the starting point
       if(steps == 0 || rpm == 0) return;
@@ -194,14 +219,20 @@ class LT_Stepper : public LT_Device {
       _steps_remaining = steps;
     }
     
-    // return the number of steps between the current position and the target position
+    /**
+     * @brief 
+     * 
+     * @return int16_t the number of steps between the current position 
+     * and the target position
+     */
     int16_t distanceToGo() const {
       return _steps_remaining;
     }
     
     /**************************************************************************/
     /*!
-    @brief read the current postion of the motor
+    @brief read the current software postion of the motor. This is the not the 
+    target position and will change if the motor is rotating.
     @return returns a value between 0 and _resolution
     */
     /**************************************************************************/

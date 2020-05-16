@@ -19,7 +19,18 @@
 			"new": "cpp",
 			"stdexcept": "cpp",
 			"typeinfo": "cpp",
-			"chrono": "cpp"
+			"chrono": "cpp",
+			"__functional_03": "cpp",
+			"functional": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"type_traits": "cpp",
+			"array": "cpp",
+			"iterator": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"vector": "cpp",
+			"random": "cpp"
 		}
 	}
 }

@@ -7,7 +7,7 @@ typedef void (*intCallback)(int);
 
 namespace Process_Info {
   enum INFO_CODE : uint8_t {
-    No_Type = 0,
+    Process_Update = 0,
     Command_Started = 1,
     Command_Ended = 2, 
     Process_Ended = 3
@@ -15,24 +15,25 @@ namespace Process_Info {
 }
 
 struct CommandData{
-  uint32_t duration;
-  uint32_t data;
-  int16_t index;
-  int8_t code;
-  int8_t target;
+  int8_t code; //< The function code of this command
+  int8_t dev_id; //< The device id that this command targets
+  uint32_t data0; //< 0th data field. 
+  uint32_t data1; //< 1st data field.
+  uint32_t duration; //< duration of the command in microseconds
+  
 
   CommandData(
     int8_t code = -1,
-    int8_t target = -1,
-    int16_t index = -1,
-    uint32_t data = 0,
-    uint32_t duration = 0
+    int8_t dev_id = -1,
+    uint32_t d0 = 0,
+    uint32_t d1 = 0,
+    uint32_t dur = 0
   ):
     code(code),
-    target(target),
-    index(index),
-    data(data),
-    duration(duration)
+    dev_id(dev_id),
+    data0(d0),
+    data1(d1),
+    duration(dur)
   {}
 };
 
@@ -48,6 +49,8 @@ public:
   // zero the memory of this object 
   void reset(){
     memset (this, 0, sizeof (*this));
+    _count = 0;
+    _next = 0;
   }
   // add a command to the buffer. The count
   // variable is incremented to indicate the buffer
@@ -72,6 +75,17 @@ public:
       return -1;
     }
   }
+  int8_t get(const uint8_t index, CommandData* data) {
+    if(index < _count) {
+      *data = _v[index];
+      return 0;
+    }
+    else {
+      // error index OOB
+      return -1;
+    }
+
+  }
   uint8_t count() const { return _count; }
 };
 
@@ -81,8 +95,8 @@ class ProcessManager {
   RingBuffer<BUFFER_LENGTH, CommandData> _buffer; ///< sequential command buffer
   ProcessVector<INTERRUPT_LENGTH> _interrupts[INTERRUPT_COUNT]; ///< 
 
-  CommandData _current;
-  CommandData _last;
+  CommandData _current = CommandData();
+  CommandData _last = CommandData();
   CommandData _waiting;
   bool _running = false; ///< flag to track if the protocol is currrently running
   uint8_t _vector = 0; ///< flag to track if the protocol is interrupted. 0 is false. > 0 is the (vector - 1)
@@ -114,23 +128,9 @@ public:
           _current = next_cmd;
           _last_command_start_time = LT_current_time_us;
           updateCommand();
-          /*
-         // uint32_t t_r = _current._duration - dt;
-          uint32_t t_r = LT_current_time_us - (_last_command_start_time + _current._duration);
-          //uint32_t t_r = dt - _current._duration;
-
-          Serial.print("TIME REMAIING:");
-          Serial.println(t_r);
-
-          Serial.print("COMMAND STARTED! Duration=");
-          Serial.print(_current._duration);
-          Serial.print("START TIME=");
-          Serial.print(_last_command_start_time);
-          Serial.print("TIME REMAINING=");
-          Serial.println(t_r);*/
         }
         else {
-          // there are no more commands in the buffer. stop the protocol
+          // there are no more commands in the buffer. stop the process
           _running = false;
           _last = _current;
           // sets the current command to an invalid command
@@ -153,8 +153,16 @@ public:
   const CommandData* currentCommand() const {return &_current;}
   const CommandData* previousCommand() const {return &_last;}
 
-  const uint8_t peek(uint8_t index, CommandData* c) const {
-    return _buffer.get(index, c);
+  const int8_t peek(const uint8_t queue, const uint8_t index, CommandData* c) const {
+    if(queue == 0) {
+      return _buffer.get(index, c);
+    }
+    else if(queue <= INTERRUPT_COUNT) {
+      return _interrupts[queue-1].get(index, c);
+    }
+    else {
+      return -1;
+    }
   }
 
   /*!
@@ -167,11 +175,23 @@ public:
         (_command_ended_callback)(_last_vector);
     }
   }
-
+  /**
+   * @brief 
+   * 
+   * @return uint32_t the amount of time remaining until the current 
+   * command is finished in microseconds. Returns 0 if there is no time remaining
+   */
   uint32_t remainingTime() const {
-    return (_last_command_start_time + _current.duration - LT_current_time_us);
+    uint32_t end_time = _last_command_start_time + _current.duration;
+    return (end_time  > LT_current_time_us) ? (end_time - LT_current_time_us) : 0;
   }
 
+  /**
+   * @brief 
+   * 
+   * @return uint32_t the amount of time that has passed since
+   * the current command started in microseconds.
+   */
   uint32_t currentCommandElapsedTime() const {
     return (LT_current_time_us - _last_command_start_time);
   }
@@ -188,9 +208,12 @@ public:
       _process_ended_callback = f;
   }
 
-/*!
+/**
+ * @brief returns the current queue that the process manager is running.
+ * 
+ * @return uint8_t from 0 to INTERRUPT_COUNT
  */
-  uint8_t vector() const { return _vector; }
+  uint8_t currentVector() const { return _vector; }
 
   /*!
   * @brief 
@@ -198,7 +221,6 @@ public:
   * q == 1 : INTERRUPT_COUNT is an interrupt vector
   * if q > INTERRUPT_COUNT, returns 0
   * @return the number of spaces available in the queue
-  * 
   */
   uint8_t available(const uint8_t q) const {
     if(q == 0) {
@@ -232,15 +254,15 @@ public:
     }
   }
 
-  bool queueCommand(const uint8_t q, const CommandData data) {
-    if(q == 0) {
+  bool queueCommand(const uint8_t queue, const CommandData data) {
+    if(queue == 0) {
       // return true if there was room and the command was buffered
       return (_buffer.put(data) == 0 ? true : false);
     }
-    else if(q <= INTERRUPT_COUNT) {
+    else if(queue <= INTERRUPT_COUNT) {
       //Serial.print("attempting to enqueue to: ");
       //Serial.println(q);
-      return _interrupts[q-1].put(data);
+      return _interrupts[queue-1].put(data);
     }
     else {
       return false;
@@ -269,8 +291,8 @@ public:
         _last_vector = _vector;
         _vector = v;
         updateCommand();
+        return true;
       }
-      return true;
     }
     return false;
   }
@@ -338,7 +360,7 @@ public:
   }
 };
 
-// bring in a global external variable to keep track of time
+// global external variable to keep track of time
 extern uint32_t LT_current_time_us;
 
 #endif // End __PROCESS_MANAGER_H__ include guard

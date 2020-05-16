@@ -34,13 +34,17 @@ struct SelectInteger : SelectInteger_<RequiredBits<Max>::value> {};
 
 // Example: Make a 16-unit ring buffer of unsigned 8-bit ints: RingBuffer<16, uint8_t> buffer;
 
+// the type TS of the head and tail counters is 
+// automatically chosen from the length of the buffer
 template <int BUFFER_LENGTH, class T, class TS = typename SelectInteger<BUFFER_LENGTH>::type>
 //template < uint8_t BUFFER_LENGTH , class T >
 class RingBuffer {
     //uint8_t _elements = BUFFER_LENGTH;
+    // the type TS of the head and tail counters is 
+    // automatically chosen from the length of the buffer
     TS _head = 0;
     TS _tail = 0;
-    T _buffer[BUFFER_LENGTH];// = {0};
+    T _buffer[BUFFER_LENGTH] = {0};
 
 public:
 
@@ -63,7 +67,7 @@ public:
     // gets data from the specified index
     // does not modify the contents of the buffer
     int8_t get(const TS index, T *data) const {
-        if(index < BUFFER_LENGTH && ( !isEmpty() )) {
+        if(index < BUFFER_LENGTH && ( index < count() )) {
             const TS offset = ( (_tail+index) & (BUFFER_LENGTH - 1));
             *data = _buffer[offset];
             return 0;

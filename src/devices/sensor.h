@@ -24,6 +24,10 @@ class LT_Sensor : public LT_Device {
     LT_Sensor(const uint8_t id) : LT_Device(id) {}
     
     virtual LT::DeviceType type() const = 0;
+
+    bool isPolling() const {
+      return _polling;
+    }
     
     void setPolling(bool isPolling) {
       _polling = isPolling;
@@ -33,7 +37,7 @@ class LT_Sensor : public LT_Device {
       _polling_interval_us = interval;
     }
     
-    uint32_t getPollingInterval() {
+    uint32_t getPollingInterval() const {
       return _polling_interval_us;
     }
     
@@ -41,7 +45,7 @@ class LT_Sensor : public LT_Device {
       _newDataCallback = c;
     }
     
-    uint32_t lastSampleTime() { return _t_last_sample_us; }
+    uint32_t lastSampleTime() const { return _t_last_sample_us; }
     
     virtual uint8_t readSensor() = 0;
 

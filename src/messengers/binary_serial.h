@@ -281,7 +281,7 @@ public:
    * 
    * @param code the function code to acknowledge
    */
-  void sendAcknowledge(LT::FN_CODE code)
+  void sendAcknowledge(const LT::FN_CODE code)
   {
     uint8_t packet[2] = {LT::Acknowledge, code};
     sendPacket(packet, 2);
